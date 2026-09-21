@@ -1,0 +1,91 @@
+/* ✅ FRONTEND - ClientDashboard SCSS */
+/* Fichier: tms-frontend/tms-frontend/src/app/modules/client-dashboard/client-dashboard.component.scss */
+
+.dashboard-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+
+  .spacer {
+    flex: 1 1 auto;
+  }
+
+  .user-info {
+    margin: 0 15px;
+    font-weight: 500;
+  }
+}
+
+.dashboard-container {
+  height: calc(100vh - 64px);
+  display: flex;
+}
+
+mat-sidenav {
+  width: 250px;
+  background-color: #f5f5f5;
+
+  .sidebar-header {
+    padding: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-align: center;
+
+    h2 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+  }
+
+  mat-nav-list {
+    padding: 0;
+  }
+
+  mat-list-item {
+    margin-top: 5px;
+    border-left: 4px solid transparent;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background-color: #efefef;
+    }
+
+    &.active {
+      border-left-color: #667eea;
+      background-color: #e8e8ff;
+      color: #667eea;
+    }
+
+    mat-icon {
+      color: inherit;
+    }
+  }
+
+  mat-divider {
+    margin: 10px 0;
+  }
+}
+
+.dashboard-content {
+  flex: 1;
+  overflow-y: auto;
+  background-color: #fafafa;
+}
+
+.content-wrapper {
+  padding: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  mat-sidenav {
+    width: 200px;
+  }
+
+  .content-wrapper {
+    padding: 20px;
+  }
+}

@@ -1,0 +1,183 @@
+<div class="list-shell">
+
+  <!-- ══ HEADER ═══════════════════════════════════════════════ -->
+  <header class="list-header">
+    <div class="list-header__left">
+      <div class="page-icon"><mat-icon>route</mat-icon></div>
+      <div>
+        <h1>Tournées</h1>
+        <p>{{ tournees.length }} tournée{{ tournees.length > 1 ? 's' : '' }} au total</p>
+      </div>
+    </div>
+    <button mat-flat-button class="btn-nouvelle" (click)="nouvelle()">
+      <mat-icon>add</mat-icon> Nouvelle tournée
+    </button>
+  </header>
+
+  <!-- ══ KPI CARDS ═════════════════════════════════════════════ -->
+  <div class="kpi-row">
+    <div *ngFor="let k of kpiCards"
+         class="kpi-card"
+         [class.active]="filtreStatut === k.statut"
+         [style.--kpi-color]="k.color"
+         [style.--kpi-bg]="k.bg"
+         (click)="setFiltreStatut(k.statut)">
+      <div class="kpi-card__icon"><mat-icon>{{ k.icon }}</mat-icon></div>
+      <div class="kpi-card__body">
+        <span class="kpi-card__val">{{ k.val }}</span>
+        <span class="kpi-card__label">{{ k.label }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TOOLBAR ═══════════════════════════════════════════════ -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <mat-icon>search</mat-icon>
+      <input type="text" [formControl]="searchCtrl"
+             placeholder="Rechercher chauffeur, véhicule, référence..."
+             class="search-input">
+      <button *ngIf="searchCtrl.value" class="search-clear" (click)="searchCtrl.setValue('')">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ TABLE ═════════════════════════════════════════════════ -->
+  <div class="table-card">
+
+    <!-- Skeleton loader -->
+    <div *ngIf="loading" class="skeleton-wrap">
+      <div *ngFor="let _ of [1,2,3,4,5]" class="skeleton-row">
+        <div class="skel skel--date"></div>
+        <div class="skel skel--ref"></div>
+        <div class="skel skel--name"></div>
+        <div class="skel skel--name"></div>
+        <div class="skel skel--badge"></div>
+        <div class="skel skel--badge"></div>
+        <div class="skel skel--actions"></div>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div *ngIf="!loading && tourneesFiltrees.length === 0" class="empty-state">
+      <div class="empty-state__icon">🗺️</div>
+      <h3>Aucune tournée trouvée</h3>
+      <p>{{ searchCtrl.value ? 'Essayez de modifier votre recherche' : 'Créez votre première tournée' }}</p>
+      <button mat-flat-button class="btn-nouvelle" (click)="nouvelle()" *ngIf="!searchCtrl.value">
+        <mat-icon>add</mat-icon> Nouvelle tournée
+      </button>
+    </div>
+
+    <!-- Table -->
+    <table *ngIf="!loading && tourneesFiltrees.length > 0" class="tournee-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Référence</th>
+          <th>Chauffeur</th>
+          <th>Véhicule</th>
+          <th>Livraisons</th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let t of pageCourante; trackBy: trackById" class="tournee-row">
+
+          <!-- Date -->
+          <td class="td-date">
+            <span class="date-badge">{{ formatDate(t.dateTournee) }}</span>
+          </td>
+
+          <!-- Référence -->
+          <td class="td-ref">
+            <code class="ref-code">{{ t.numeroTournee }}</code>
+          </td>
+
+          <!-- Chauffeur -->
+          <td class="td-chauffeur">
+            <div class="person-cell">
+              <div class="avatar" [style.background]="'#1B4F72'">
+                {{ t.chauffeurNom?.charAt(0) }}
+              </div>
+              <div class="person-info">
+                <span class="person-name">{{ t.chauffeurNom }}</span>
+                <span class="person-meta" *ngIf="t.chauffeurTelephone">{{ t.chauffeurTelephone }}</span>
+              </div>
+            </div>
+          </td>
+
+          <!-- Véhicule -->
+          <td class="td-vehicule">
+            <div class="vehicule-cell">
+              <mat-icon class="v-icon">local_shipping</mat-icon>
+              <div>
+                <span class="v-label">{{ t.vehiculeLabel }}</span>
+              </div>
+            </div>
+          </td>
+
+          <!-- Livraisons -->
+          <td class="td-commandes">
+            <div class="commandes-badge">
+              <mat-icon>inventory_2</mat-icon>
+              <span>{{ t.nombreCommandes }}</span>
+            </div>
+          </td>
+
+          <!-- Statut -->
+          <td class="td-statut">
+            <span class="statut-badge"
+                  [style.background]="getStatutConfig(t.statut).bg"
+                  [style.color]="getStatutConfig(t.statut).color"
+                  [style.border-color]="getStatutConfig(t.statut).border">
+              <mat-icon>{{ getStatutConfig(t.statut).icon }}</mat-icon>
+              {{ getStatutConfig(t.statut).label }}
+            </span>
+          </td>
+
+          <!-- Actions -->
+          <td class="td-actions">
+            <div class="actions-group">
+              <button class="action-btn action-btn--view" (click)="voir(t.id)"
+                      matTooltip="Voir les détails">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              <button class="action-btn action-btn--edit" (click)="modifier(t.id)"
+                      [disabled]="t.statut !== 'PLANIFIEE'"
+                      matTooltip="{{ t.statut !== 'PLANIFIEE' ? 'Non modifiable' : 'Modifier' }}">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button class="action-btn action-btn--delete" (click)="supprimer(t)"
+                      [disabled]="t.statut !== 'PLANIFIEE'"
+                      matTooltip="{{ t.statut !== 'PLANIFIEE' ? 'Non supprimable' : 'Supprimer' }}">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </div>
+          </td>
+
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="!loading && totalPages > 1">
+      <button class="page-btn" (click)="page = page - 1" [disabled]="page === 0">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <button *ngFor="let p of pages"
+              class="page-btn"
+              [class.active]="p === page"
+              (click)="page = p">{{ p + 1 }}</button>
+      <button class="page-btn" (click)="page = page + 1" [disabled]="page >= totalPages - 1">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+      <span class="page-info">
+        {{ page * pageSize + 1 }}–{{ ((page + 1) * pageSize > tourneesFiltrees.length ? tourneesFiltrees.length : (page + 1) * pageSize) }}
+        sur {{ tourneesFiltrees.length }}
+      </span>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,218 @@
+/* ✅ FRONTEND - RequestRejectedComponent SCSS */
+/* Fichier: tms-frontend/tms-frontend/src/app/modules/auth/request-rejected/request-rejected.component.scss */
+
+.request-rejected-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+  padding: 20px;
+}
+
+.rejected-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  padding: 60px 40px;
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+
+  h1 {
+    font-size: 2rem;
+    color: #333;
+    margin: 30px 0 20px 0;
+    font-weight: 600;
+  }
+}
+
+.icon-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+
+  .main-icon {
+    font-size: 80px;
+    width: 80px;
+    height: 80px;
+    color: #ff6b6b;
+    animation: shake 0.5s ease-in-out;
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-10px);
+  }
+  75% {
+    transform: translateX(10px);
+  }
+}
+
+.message {
+  font-size: 1.1rem;
+  color: #666;
+  margin: 20px 0;
+
+  strong {
+    color: #ff6b6b;
+  }
+}
+
+.info-section {
+  background: #fff5f5;
+  border-left: 4px solid #ff6b6b;
+  padding: 20px;
+  margin: 30px 0;
+  border-radius: 6px;
+  text-align: left;
+
+  .info-text {
+    margin: 10px 0;
+    color: #555;
+    line-height: 1.6;
+
+    &:first-child {
+      margin-top: 0;
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.status-box {
+  background: #ffebee;
+  border: 2px solid #ff6b6b;
+  padding: 20px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin: 30px 0;
+
+  .status-icon {
+    color: #ff6b6b;
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .status-text {
+    font-weight: 600;
+    color: #c62828;
+    font-size: 1.1rem;
+  }
+}
+
+.next-steps {
+  text-align: left;
+  margin: 30px 0;
+
+  h3 {
+    color: #333;
+    margin-bottom: 20px;
+  }
+
+  .steps-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+
+    .step-number {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      background: #ff6b6b;
+      color: white;
+      border-radius: 50%;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .step-text {
+      color: #666;
+      font-size: 0.95rem;
+      padding-top: 5px;
+    }
+  }
+}
+
+.action-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin: 30px 0;
+  flex-wrap: wrap;
+
+  button {
+    min-width: 150px;
+
+    mat-icon {
+      margin-right: 8px;
+    }
+  }
+
+  button[color="warn"] {
+    background-color: #ff6b6b;
+  }
+}
+
+.help-section {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+  color: #999;
+  font-size: 0.9rem;
+
+  a {
+    color: #ff6b6b;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .rejected-card {
+    padding: 40px 20px;
+
+    h1 {
+      font-size: 1.5rem;
+    }
+  }
+
+  .icon-wrapper .main-icon {
+    font-size: 60px;
+    width: 60px;
+    height: 60px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+
+    button {
+      width: 100%;
+    }
+  }
+
+  .next-steps .steps-list {
+    gap: 10px;
+  }
+}

@@ -1,0 +1,195 @@
+/* ✅ FRONTEND - WaitingApprovalComponent SCSS */
+/* Fichier: tms-frontend/tms-frontend/src/app/modules/auth/waiting-approval/waiting-approval.component.scss */
+
+.waiting-approval-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+}
+
+.waiting-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  padding: 60px 40px;
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+
+  h1 {
+    font-size: 2rem;
+    color: #333;
+    margin: 30px 0 20px 0;
+    font-weight: 600;
+  }
+}
+
+.icon-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+
+  .main-icon {
+    font-size: 80px;
+    width: 80px;
+    height: 80px;
+    color: #ffc107;
+    animation: bounce 2s infinite;
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.message {
+  font-size: 1.1rem;
+  color: #666;
+  margin: 20px 0;
+
+  strong {
+    color: #667eea;
+  }
+}
+
+.info-section {
+  background: #f8f9ff;
+  border-left: 4px solid #667eea;
+  padding: 20px;
+  margin: 30px 0;
+  border-radius: 6px;
+  text-align: left;
+
+  .info-text {
+    margin: 10px 0;
+    color: #555;
+    line-height: 1.6;
+
+    &:first-child {
+      margin-top: 0;
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.status-box {
+  background: #fff3cd;
+  border: 2px solid #ffc107;
+  padding: 20px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin: 30px 0;
+
+  .status-icon {
+    color: #ff9800;
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .status-text {
+    font-weight: 600;
+    color: #856404;
+    font-size: 1.1rem;
+  }
+}
+
+.info-list {
+  text-align: left;
+  margin: 30px 0;
+
+  h3 {
+    color: #333;
+    margin-bottom: 15px;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 12px 0;
+      color: #666;
+      font-size: 0.95rem;
+
+      mat-icon {
+        color: #667eea;
+        flex-shrink: 0;
+      }
+    }
+  }
+}
+
+.action-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin: 30px 0;
+  flex-wrap: wrap;
+
+  button {
+    min-width: 200px;
+
+    mat-icon {
+      margin-right: 8px;
+    }
+  }
+}
+
+.help-section {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+  color: #999;
+  font-size: 0.9rem;
+
+  a {
+    color: #667eea;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .waiting-card {
+    padding: 40px 20px;
+
+    h1 {
+      font-size: 1.5rem;
+    }
+  }
+
+  .icon-wrapper .main-icon {
+    font-size: 60px;
+    width: 60px;
+    height: 60px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+
+    button {
+      width: 100%;
+    }
+  }
+}

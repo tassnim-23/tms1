@@ -1,0 +1,70 @@
+<!-- ✅ FRONTEND - WaitingApprovalComponent HTML Template -->
+<!-- Fichier: tms-frontend/tms-frontend/src/app/modules/auth/waiting-approval/waiting-approval.component.html -->
+
+<div class="waiting-approval-container">
+  <div class="waiting-card">
+    <div class="icon-wrapper">
+      <mat-icon class="main-icon">schedule</mat-icon>
+    </div>
+
+    <h1>Demande en Attente d'Approbation</h1>
+
+    <p class="message">
+      Bonjour <strong>{{ username }}</strong>,
+    </p>
+
+    <div class="info-section">
+      <p class="info-text">
+        Votre demande d'inscription a été reçue avec succès.
+      </p>
+      <p class="info-text">
+        Un administrateur examinera votre demande dans les prochains jours.
+        Vous recevrez une notification dès qu'elle sera traitée.
+      </p>
+    </div>
+
+    <div class="status-box">
+      <mat-icon class="status-icon">hourglass_top</mat-icon>
+      <span class="status-text">Statut: EN ATTENTE</span>
+    </div>
+
+    <div class="info-list">
+      <h3>Que se passe-t-il maintenant?</h3>
+      <ul>
+        <li>
+          <mat-icon>check_circle</mat-icon>
+          <span>Votre demande a été enregistrée</span>
+        </li>
+        <li>
+          <mat-icon>schedule</mat-icon>
+          <span>Examen par l'équipe d'administration</span>
+        </li>
+        <li>
+          <mat-icon>notifications_active</mat-icon>
+          <span>Vous serez notifié de la décision</span>
+        </li>
+        <li>
+          <mat-icon>lock_open</mat-icon>
+          <span>Accès complet après approbation</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="action-buttons">
+      <button mat-raised-button color="accent" (click)="refreshStatus()">
+        <mat-icon>refresh</mat-icon>
+        Actualiser le Statut
+      </button>
+      <button mat-button (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        Déconnexion
+      </button>
+    </div>
+
+    <div class="help-section">
+      <p>Des questions? 
+        <a href="mailto:support@tms.com">Contactez le support</a>
+      </p>
+    </div>
+  </div>
+</div>

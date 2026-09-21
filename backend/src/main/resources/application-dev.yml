@@ -1,0 +1,58 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/tms_db_dev
+    username: postgres
+    password: projetpfe
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  cache:
+    type: simple
+
+  mail:
+    username: dev@localhost
+    password: dev-password
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+jwt:
+  secret: tms-grpo-dev-secret-key-minimum-32-characters-ok
+  expiration: 604800000
+  refresh:
+    expiration: 2592000000
+
+app:
+  email:
+    enabled: false
+  frontend-url: http://localhost:4200
+  api:
+    cors:
+      allowed-origins: http://localhost:4200
+      allow-credentials: true
+
+twilio:
+  enabled: false
+  account:
+    sid: dev-sid
+  auth:
+    token: dev-token
+  phone:
+    number: "+21600000000"
+
+security:
+  max-failed-attempts: 5
+  block-duration-minutes: 15
+  failed-attempts-window-minutes: 30
+
+logging:
+  level:
+    com.grpo.tms: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG

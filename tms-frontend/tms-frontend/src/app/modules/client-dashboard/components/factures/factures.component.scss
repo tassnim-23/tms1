@@ -1,0 +1,97 @@
+.factures-container {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  h2 {
+    margin-top: 0;
+    color: #333;
+  }
+
+  .loading, .error {
+    padding: 20px;
+    text-align: center;
+    border-radius: 4px;
+  }
+
+  .loading {
+    background: #e3f2fd;
+    color: #1976d2;
+  }
+
+  .error {
+    background: #ffebee;
+    color: #c62828;
+  }
+
+  .empty-state {
+    padding: 40px 20px;
+    text-align: center;
+    color: #999;
+  }
+
+  .factures-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+
+    thead {
+      background: #f5f5f5;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      font-weight: bold;
+      color: #333;
+    }
+
+    tbody tr:hover {
+      background: #fafafa;
+    }
+
+    .statut-payee {
+      color: green;
+      font-weight: bold;
+    }
+
+    .statut-en_attente {
+      color: orange;
+      font-weight: bold;
+    }
+
+    .statut-retard {
+      color: red;
+      font-weight: bold;
+    }
+  }
+
+  .btn-primary, .btn-success {
+    padding: 8px 15px;
+    margin-right: 5px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.3s;
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+
+  .btn-primary {
+    background: #1976d2;
+    color: white;
+  }
+
+  .btn-success {
+    background: #388e3c;
+    color: white;
+  }
+}

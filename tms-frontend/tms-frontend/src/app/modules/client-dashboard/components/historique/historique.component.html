@@ -1,0 +1,27 @@
+<div class="historique-container">
+  <h2>Historique</h2>
+
+  <div class="export-buttons">
+    <button (click)="exportPDF()" class="btn-export">📥 Exporter PDF</button>
+    <button (click)="exportCSV()" class="btn-export">📥 Exporter CSV</button>
+  </div>
+
+  <div *ngIf="error" class="error-message">{{ error }}</div>
+  <div *ngIf="loading" class="loading">Chargement...</div>
+
+  <div *ngIf="!loading && historiques.length > 0" class="historique-list">
+    <div *ngFor="let item of historiques" class="historique-item">
+      <div class="item-type" [ngClass]="item.type.toLowerCase()">{{ item.type }}</div>
+      <div class="item-content">
+        <h4>#{{ item.reference }}</h4>
+        <p><strong>Date:</strong> {{ item.dateCreation | date: 'dd/MM/yyyy' }}</p>
+        <p><strong>Statut:</strong> {{ item.statut }}</p>
+        <p *ngIf="item.montant"><strong>Montant:</strong> {{ item.montant | currency: 'TND' }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && historiques.length === 0" class="empty-state">
+    Aucun historique trouvé
+  </div>
+</div>

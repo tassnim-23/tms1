@@ -1,0 +1,69 @@
+<!-- ══ FONCTIONNALITÉS ══════════════════════════════════════════ -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="section-head">
+      <span class="section-tag">Fonctionnalités</span>
+      <h2 class="section-title">Tout ce dont vous avez besoin</h2>
+      <div class="divider"></div>
+      <p class="section-sub">Une plateforme complète pour gérer chaque aspect de votre activité transport</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card" *ngFor="let f of features; let i = index"
+           [style.animation-delay]="i * 0.1 + 's'">
+        <div class="feature-icon-wrap" [style.background]="f.bg">
+          <!-- ✅ IMAGE AU LIEU DE L'EMOJI -->
+          <img [src]="f.img" [alt]="f.title" class="feature-img">
+        </div>
+        <h3>{{f.title}}</h3>
+        <p>{{f.desc}}</p>
+        <div class="card-num">0{{i+1}}</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ COMMENT ÇA MARCHE ════════════════════════════════════════ -->
+<section class="process" id="process">
+  <div class="container">
+    <div class="section-head">
+      <span class="section-tag">Processus</span>
+      <h2 class="section-title">Démarrez en 3 étapes simples</h2>
+      <div class="divider"></div>
+    </div>
+    <div class="process-steps">
+      <div class="process-step" *ngFor="let step of steps; let i = index">
+        <div class="step-circle">
+          <span class="step-n">{{i+1}}</span>
+          <!-- ✅ IMAGE AU LIEU DE L'EMOJI -->
+          <img [src]="step.img" [alt]="step.title" class="step-img">
+        </div>
+        <h4>{{step.title}}</h4>
+        <p>{{step.desc}}</p>
+      </div>
+      <div class="process-line"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ MODULES ══════════════════════════════════════════════════ -->
+<section class="modules-section" id="modules">
+  <div class="container">
+    <div class="section-head light">
+      <span class="section-tag green">Modules TMS</span>
+      <h2 class="section-title white">Une solution modulaire complète</h2>
+      <div class="divider green"></div>
+      <p class="section-sub white">Chaque module est conçu pour s'intégrer parfaitement avec les autres</p>
+    </div>
+    <div class="modules-grid">
+      <div class="module-card" *ngFor="let m of modules">
+        <!-- ✅ IMAGE AU LIEU DE L'EMOJI -->
+        <img [src]="m.img" [alt]="m.title" class="module-icon-img">
+        <div class="module-body">
+          <h4>{{m.title}}</h4>
+          <p>{{m.desc}}</p>
+        </div>
+        <div class="module-arrow">→</div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,45 @@
+<div class="factures-container">
+  <h2>Mes Factures</h2>
+
+  <div *ngIf="loading" class="loading">Chargement...</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <table *ngIf="!loading && factures.length > 0" class="factures-table">
+    <thead>
+      <tr>
+        <th>Numéro</th>
+        <th>Date</th>
+        <th>Montant</th>
+        <th>Statut</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let facture of factures">
+        <td>{{ facture.numero }}</td>
+        <td>{{ facture.dateFacture | date: 'dd/MM/yyyy' }}</td>
+        <td>{{ facture.montant | currency: 'TND' }}</td>
+        <td>
+          <span [ngClass]="'statut-' + facture.statut.toLowerCase()">
+            {{ facture.statut }}
+          </span>
+        </td>
+        <td>
+          <button (click)="telechargerFacture(facture)" class="btn-primary">
+            📥 Télécharger
+          </button>
+          <button 
+            *ngIf="facture.statut === 'EN_ATTENTE'"
+            (click)="marquerCommePayee(facture)"
+            class="btn-success">
+            ✓ Payée
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!loading && factures.length === 0" class="empty-state">
+    Aucune facture trouvée
+  </div>
+</div>

@@ -1,0 +1,102 @@
+<!-- ✅ FRONTEND - HistoriqueComponent HTML Template -->
+<!-- Fichier: tms-frontend/tms-frontend/src/app/modules/client-dashboard/components/historique/historique.component.html -->
+
+<div class="historique-container">
+  <h1>Historique</h1>
+
+  <!-- Filtres et actions -->
+  <div class="filters-section">
+    <div class="filter-buttons">
+      <button mat-button 
+              [class.active]="filterType === 'ALL'"
+              (click)="filterByType('ALL')">
+        Tous
+      </button>
+      <button mat-button 
+              [class.active]="filterType === 'COMMANDE'"
+              (click)="filterByType('COMMANDE')">
+        Commandes
+      </button>
+      <button mat-button 
+              [class.active]="filterType === 'FACTURE'"
+              (click)="filterByType('FACTURE')">
+        Factures
+      </button>
+    </div>
+
+    <div class="export-buttons">
+      <button mat-mini-fab matTooltip="Télécharger en PDF" (click)="downloadPdf()">
+        <mat-icon>picture_as_pdf</mat-icon>
+      </button>
+      <button mat-mini-fab matTooltip="Télécharger en CSV" (click)="downloadCsv()">
+        <mat-icon>table_chart</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading spinner -->
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner></mat-spinner>
+    <p>Chargement de l'historique...</p>
+  </div>
+
+  <!-- Historique table -->
+  <mat-card *ngIf="!loading" class="historique-card">
+    <mat-card-header>
+      <mat-card-title>Historique Complet</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div *ngIf="historique.length === 0" class="no-data">
+        <p>Aucun élément dans l'historique</p>
+      </div>
+
+      <table *ngIf="historique.length > 0" mat-table [dataSource]="historique" class="historique-table">
+        
+        <!-- Reference Column -->
+        <ng-container matColumnDef="reference">
+          <th mat-header-cell *matHeaderCellDef>Référence</th>
+          <td mat-cell *matCellDef="let element">{{ element.reference }}</td>
+        </ng-container>
+
+        <!-- Date Column -->
+        <ng-container matColumnDef="dateCreation">
+          <th mat-header-cell *matHeaderCellDef>Date</th>
+          <td mat-cell *matCellDef="let element">{{ formatDate(element.dateCreation) }}</td>
+        </ng-container>
+
+        <!-- Type Column -->
+        <ng-container matColumnDef="type">
+          <th mat-header-cell *matHeaderCellDef>Type</th>
+          <td mat-cell *matCellDef="let element">
+            <mat-icon class="type-icon" [class]="'type-' + element.type.toLowerCase()">
+              {{ getTypeIcon(element.type) }}
+            </mat-icon>
+            {{ element.type }}
+          </td>
+        </ng-container>
+
+        <!-- Statut Column -->
+        <ng-container matColumnDef="statut">
+          <th mat-header-cell *matHeaderCellDef>Statut</th>
+          <td mat-cell *matCellDef="let element">
+            <span class="badge" [class]="'badge-' + element.statut.toLowerCase()">
+              {{ element.statut }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Montant Column -->
+        <ng-container matColumnDef="montant">
+          <th mat-header-cell *matHeaderCellDef>Montant</th>
+          <td mat-cell *matCellDef="let element">
+            {{ element.montant ? (element.montant | currency:'DZD':'symbol':'1.2-2') : '-' }}
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </mat-card-content>
+  </mat-card>
+</div>

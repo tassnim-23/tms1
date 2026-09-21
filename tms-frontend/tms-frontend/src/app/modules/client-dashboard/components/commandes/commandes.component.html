@@ -1,0 +1,320 @@
+<div class="cmd-shell">
+
+  <!-- ── HEADER ─────────────────────────────────────────────────── -->
+  <div class="cmd-header">
+    <div class="cmd-header__title">
+      <span class="cmd-header__icon">📦</span>
+      <div>
+        <h2>Mes Commandes</h2>
+        <p>{{ commandes.length }} commande{{ commandes.length !== 1 ? 's' : '' }}</p>
+      </div>
+    </div>
+    <button class="btn-new" (click)="ouvrirFormulaire()" *ngIf="!showForm">
+      <span>➕</span> Nouvelle commande
+    </button>
+  </div>
+
+  <!-- ── MESSAGE SUCCÈS ─────────────────────────────────────────── -->
+  <div class="alert-success" *ngIf="successMsg">
+    {{ successMsg }}
+    <button class="alert-close" (click)="successMsg = null">✕</button>
+  </div>
+
+  <!-- ── FORMULAIRE NOUVELLE COMMANDE ──────────────────────────── -->
+  <div class="form-card" *ngIf="showForm">
+    <div class="form-card__header">
+      <span>📝 Nouvelle demande de livraison</span>
+      <button class="form-card__close" (click)="fermerFormulaire()">✕</button>
+    </div>
+
+    <div class="alert-error" *ngIf="error">{{ error }}</div>
+
+    <form [formGroup]="commandeForm" (ngSubmit)="creerCommande()" class="cmd-form" novalidate>
+
+      <!-- ══ SECTION A : Point de chargement ══ -->
+      <div class="form-section">
+        <div class="form-section__title">
+          <span class="form-section__num">A</span>
+          Point de chargement
+        </div>
+        <div class="field">
+          <label class="field-label">Dépôt de chargement <span class="req">*</span></label>
+          <div class="select-wrap" [class.invalid]="submitted && commandeForm.get('adresseChargement')?.invalid">
+            <span class="select-ico">🏭</span>
+            <select formControlName="adresseChargement" class="field-select">
+              <option value="" disabled>— Sélectionner un dépôt GRPO —</option>
+              <option *ngFor="let pt of pointsDepart" [value]="pt.adresse">{{ pt.label }}</option>
+            </select>
+          </div>
+          <span class="field-hint">Le dépôt où votre marchandise sera collectée</span>
+          <span class="field-error" *ngIf="submitted && commandeForm.get('adresseChargement')?.invalid">
+            {{ getError('adresseChargement') }}
+          </span>
+        </div>
+      </div>
+
+      <!-- ══ SECTION B : Adresse de livraison (GPS) ══ -->
+      <div class="form-section form-section--geo">
+        <div class="form-section__title">
+          <span class="form-section__num form-section__num--green">B</span>
+          📍 Adresse de livraison
+        </div>
+        <p class="section-hint">Sélectionnez gouvernorat → quartier → rue — l'adresse se construit automatiquement</p>
+
+        <!-- Gouvernorat + Code postal -->
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Gouvernorat <span class="req">*</span></label>
+            <div class="select-wrap" [class.invalid]="submitted && commandeForm.get('gouvernoratLivraison')?.invalid">
+              <span class="select-ico">🗺️</span>
+              <select formControlName="gouvernoratLivraison" class="field-select">
+                <option value="">— Sélectionner le gouvernorat —</option>
+                <option *ngFor="let g of gouvernorats" [value]="g">{{ g }}</option>
+              </select>
+            </div>
+            <span class="field-error" *ngIf="submitted && commandeForm.get('gouvernoratLivraison')?.invalid">Gouvernorat requis</span>
+          </div>
+          <div class="field">
+            <label class="field-label">Code postal</label>
+            <div class="input-wrap input-wrap--readonly">
+              <input type="text" formControlName="codePostalLivraison" class="field-input" placeholder="Auto" readonly>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quartier / Délégation -->
+        <div class="field" *ngIf="quartiersDisponibles.length > 0">
+          <label class="field-label">Quartier / Délégation <span class="req">*</span></label>
+          <div class="select-wrap" [class.invalid]="submitted && commandeForm.get('quartierLivraison')?.invalid">
+            <span class="select-ico">🏘️</span>
+            <select formControlName="quartierLivraison" class="field-select">
+              <option value="">— Sélectionner le quartier —</option>
+              <option *ngFor="let q of quartiersDisponibles" [value]="q">{{ q }}</option>
+            </select>
+          </div>
+          <span class="field-error" *ngIf="submitted && commandeForm.get('quartierLivraison')?.invalid">Quartier requis</span>
+        </div>
+
+        <!-- Rue -->
+        <div class="field" *ngIf="ruesDisponibles.length > 0">
+          <label class="field-label">Rue / Avenue <span class="req">*</span></label>
+          <div class="select-wrap" [class.invalid]="submitted && commandeForm.get('rueLivraison')?.invalid">
+            <span class="select-ico">🛣️</span>
+            <select formControlName="rueLivraison" class="field-select">
+              <option value="">— Sélectionner la rue —</option>
+              <option *ngFor="let r of ruesDisponibles" [value]="r">{{ r }}</option>
+            </select>
+          </div>
+          <span class="field-error" *ngIf="submitted && commandeForm.get('rueLivraison')?.invalid">Rue requise</span>
+        </div>
+
+        <!-- N° bâtiment + Complément -->
+        <div class="field-row" *ngIf="rueSelectionnee">
+          <div class="field">
+            <label class="field-label">N° / Bâtiment</label>
+            <div class="input-wrap">
+              <input type="text" [formControl]="numeroBatiment" class="field-input"
+                     placeholder="Ex: 12, Apt 3B" (input)="construireAdresse()">
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label">Complément (optionnel)</label>
+            <div class="input-wrap">
+              <input type="text" [formControl]="complementAdresse" class="field-input"
+                     placeholder="Ex: Face à la mosquée" (input)="construireAdresse()">
+            </div>
+          </div>
+        </div>
+
+        <!-- Adresse complète résultante -->
+        <div class="adresse-box" *ngIf="adresseComplete">
+          <div class="adresse-box__header">
+            📌 Adresse enregistrée
+            <span class="gps-badge" *ngIf="coordsGPS">
+              🛰️ {{ coordsGPS[0].toFixed(4) }}, {{ coordsGPS[1].toFixed(4) }}
+            </span>
+          </div>
+          <div class="adresse-box__value">{{ adresseComplete }}</div>
+        </div>
+
+        <!-- Contact + Téléphone -->
+        <div class="field-row" style="margin-top:8px">
+          <div class="field">
+            <label class="field-label">Nom du contact sur place <span class="req">*</span></label>
+            <div class="input-wrap" [class.invalid]="submitted && commandeForm.get('contactLivraison')?.invalid">
+              <input type="text" formControlName="contactLivraison" class="field-input"
+                     placeholder="Ex: Mohamed Ben Ali">
+            </div>
+            <span class="field-error" *ngIf="submitted && commandeForm.get('contactLivraison')?.invalid">
+              {{ getError('contactLivraison') }}
+            </span>
+          </div>
+          <div class="field">
+            <label class="field-label">Téléphone contact <span class="req">*</span></label>
+            <div class="input-wrap" [class.invalid]="submitted && commandeForm.get('telephoneContactLivraison')?.invalid">
+              <input type="tel" formControlName="telephoneContactLivraison" class="field-input"
+                     placeholder="+21698000000">
+            </div>
+            <span class="field-error" *ngIf="submitted && commandeForm.get('telephoneContactLivraison')?.invalid">
+              {{ getError('telephoneContactLivraison') }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Date de livraison -->
+        <div class="field field--half">
+          <label class="field-label">Date de livraison souhaitée <span class="req">*</span></label>
+          <div class="input-wrap" [class.invalid]="submitted && commandeForm.get('dateLivraisonPrevue')?.invalid">
+            <input type="date" formControlName="dateLivraisonPrevue" class="field-input" [min]="today">
+          </div>
+          <div class="date-shortcuts">
+            <button type="button" class="shortcut" (click)="setDateSouhaitee(1)">Demain</button>
+            <button type="button" class="shortcut" (click)="setDateSouhaitee(3)">+3 jours</button>
+            <button type="button" class="shortcut" (click)="setDateSouhaitee(7)">+1 semaine</button>
+          </div>
+          <span class="field-error" *ngIf="submitted && commandeForm.get('dateLivraisonPrevue')?.invalid">
+            {{ getError('dateLivraisonPrevue') }}
+          </span>
+        </div>
+      </div>
+
+      <!-- ══ SECTION C : Marchandise ══ -->
+      <div class="form-section">
+        <div class="form-section__title">
+          <span class="form-section__num">C</span>
+          Marchandise
+        </div>
+
+        <div class="field">
+          <label class="field-label">Description <span class="req">*</span></label>
+          <textarea formControlName="descriptionMarchandise" class="field-textarea" rows="3"
+                    placeholder="Nature et description de la marchandise..."></textarea>
+          <span class="field-error" *ngIf="submitted && commandeForm.get('descriptionMarchandise')?.invalid">
+            {{ getError('descriptionMarchandise') }}
+          </span>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Poids (kg) <span class="req">*</span></label>
+            <div class="input-wrap" [class.invalid]="submitted && commandeForm.get('poids')?.invalid">
+              <input type="number" formControlName="poids" class="field-input" placeholder="0" min="0.1" step="0.1">
+            </div>
+            <span class="field-error" *ngIf="submitted && commandeForm.get('poids')?.invalid">
+              {{ getError('poids') }}
+            </span>
+          </div>
+          <div class="field">
+            <label class="field-label">Volume (m³)</label>
+            <div class="input-wrap">
+              <input type="number" formControlName="volume" class="field-input" placeholder="0" min="0" step="0.01">
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Remarques</label>
+          <textarea formControlName="remarques" class="field-textarea" rows="2"
+                    placeholder="Instructions spéciales, fragilité..."></textarea>
+        </div>
+      </div>
+
+      <!-- ══ SECTION D : Priorité ══ -->
+      <div class="form-section">
+        <div class="form-section__title">
+          <span class="form-section__num">D</span>
+          Priorité de livraison
+        </div>
+        <div class="priorite-grid">
+          <div *ngFor="let p of priorites"
+               class="priorite-card"
+               [class.priorite-card--active]="commandeForm.get('priorite')?.value === p.value"
+               [style.border-color]="commandeForm.get('priorite')?.value === p.value ? p.couleur : ''"
+               [style.background]="commandeForm.get('priorite')?.value === p.value ? p.bg : ''"
+               (click)="commandeForm.get('priorite')?.setValue(p.value)">
+            <span class="priorite-icon">{{ p.icon }}</span>
+            <div class="priorite-info">
+              <div class="priorite-label" [style.color]="p.couleur">{{ p.label }}</div>
+              <div class="priorite-desc">{{ p.desc }}</div>
+            </div>
+            <span class="priorite-check" *ngIf="commandeForm.get('priorite')?.value === p.value">✓</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Boutons ── -->
+      <div class="form-actions">
+        <button type="button" class="btn-cancel" (click)="fermerFormulaire()" [disabled]="submitting">
+          ✕ Annuler
+        </button>
+        <button type="submit" class="btn-submit" [disabled]="submitting">
+          <span *ngIf="submitting">⏳ Envoi en cours...</span>
+          <span *ngIf="!submitting">✓ Soumettre la commande</span>
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- ── CHARGEMENT ──────────────────────────────────────────────── -->
+  <div class="loading-state" *ngIf="loading">
+    <div class="loading-spinner"></div>
+    <span>Chargement de vos commandes...</span>
+  </div>
+
+  <!-- ── LISTE COMMANDES ────────────────────────────────────────── -->
+  <div class="commandes-list" *ngIf="!loading && commandes.length > 0">
+    <div *ngFor="let c of commandes" class="commande-card">
+
+      <div class="commande-card__statut"
+           [style.background]="getStatutInfo(c.statut).bg"
+           [style.color]="getStatutInfo(c.statut).color">
+        {{ getStatutInfo(c.statut).icon }} {{ getStatutInfo(c.statut).label }}
+      </div>
+
+      <div class="commande-card__body">
+        <div class="commande-card__ref">
+          <span class="commande-card__num">{{ c.numeroCommande || 'CMD-NEW' }}</span>
+          <span class="commande-card__date" *ngIf="c.dateCommande">
+            {{ c.dateCommande | date:'dd/MM/yyyy' }}
+          </span>
+        </div>
+
+        <div class="commande-card__info">
+          <div class="info-row" *ngIf="c.adresseLivraison">
+            <span class="info-ico">📍</span>
+            <span>{{ c.adresseLivraison }}<span *ngIf="c.villeLivraison">, {{ c.villeLivraison }}</span></span>
+          </div>
+          <div class="info-row" *ngIf="c.descriptionMarchandise">
+            <span class="info-ico">📦</span>
+            <span>{{ c.descriptionMarchandise }}</span>
+          </div>
+          <div class="info-row" *ngIf="c.poids">
+            <span class="info-ico">⚖️</span>
+            <span>{{ c.poids }} kg<span *ngIf="c.volume"> — {{ c.volume }} m³</span></span>
+          </div>
+          <div class="info-row" *ngIf="c.dateLivraisonPrevue">
+            <span class="info-ico">📅</span>
+            <span>Livraison prévue : <strong>{{ c.dateLivraisonPrevue | date:'dd/MM/yyyy' }}</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="commande-card__actions">
+        <button class="btn-annuler"
+                *ngIf="c.statut === 'EN_ATTENTE'"
+                (click)="annulerCommande(c.id)">
+          ✕ Annuler
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ÉTAT VIDE ──────────────────────────────────────────────── -->
+  <div class="empty-state" *ngIf="!loading && commandes.length === 0">
+    <span class="empty-state__icon">📭</span>
+    <h3>Aucune commande</h3>
+    <p>Vous n'avez pas encore de commande. Cliquez sur "Nouvelle commande" pour commencer.</p>
+  </div>
+
+</div>

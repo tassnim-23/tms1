@@ -1,0 +1,490 @@
+<div class="form-shell">
+
+  <!-- HEADER -->
+  <header class="form-header">
+    <button class="back-btn" (click)="retour()">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <div class="form-title">
+      <mat-icon>{{ isEdit ? 'edit' : 'add_road' }}</mat-icon>
+      <h1>{{ isEdit ? 'Modifier la tournée' : 'Nouvelle tournée' }}</h1>
+    </div>
+    <div class="form-header__actions">
+      <button mat-stroked-button type="button" (click)="retour()">Annuler</button>
+      <button mat-flat-button class="btn-submit" type="button" (click)="soumettre()" [disabled]="saving">
+        <mat-spinner *ngIf="saving" diameter="18"></mat-spinner>
+        <mat-icon *ngIf="!saving">{{ isEdit ? 'save' : 'check_circle' }}</mat-icon>
+        {{ isEdit ? 'Enregistrer' : 'Créer la tournée' }}
+      </button>
+    </div>
+  </header>
+
+  <form [formGroup]="form" class="form-body">
+
+    <!-- ══ PANNEAU CONFIGURATION ══════════════════════════════════════ -->
+    <div class="config-panel">
+      <div class="config-header" (click)="showConfig = !showConfig">
+        <mat-icon>calendar_month</mat-icon>
+        <span>Configuration calendrier</span>
+        <mat-icon class="config-arrow">{{ showConfig ? 'expand_less' : 'expand_more' }}</mat-icon>
+      </div>
+      <div class="config-body" *ngIf="showConfig">
+        <div class="config-toggles">
+          <label class="toggle-item">
+            <input type="checkbox" [(ngModel)]="blockWeekends" [ngModelOptions]="{standalone: true}">
+            <span class="toggle-label"><mat-icon>weekend</mat-icon> Bloquer les weekends (Sam/Dim)</span>
+          </label>
+          <label class="toggle-item">
+            <input type="checkbox" [(ngModel)]="blockJoursFeries" [ngModelOptions]="{standalone: true}">
+            <span class="toggle-label"><mat-icon>event_busy</mat-icon> Bloquer les jours fériés tunisiens</span>
+          </label>
+        </div>
+        <div class="config-section" *ngIf="blockJoursFeries">
+          <div class="config-section-title">📅 Jours fériés tunisiens</div>
+          <div class="feries-list">
+            <span class="ferie-badge">1 Jan — Jour de l'An</span>
+            <span class="ferie-badge">20 Mar — Indépendance</span>
+            <span class="ferie-badge">9 Avr — Martyrs</span>
+            <span class="ferie-badge">1 Mai — Travail</span>
+            <span class="ferie-badge">25 Juil — République</span>
+            <span class="ferie-badge">13 Août — Femme</span>
+            <span class="ferie-badge">15 Oct — Évacuation</span>
+          </div>
+        </div>
+        <div class="config-section">
+          <div class="config-section-title">🚫 Jours bloqués personnalisés</div>
+          <div class="add-jour">
+            <input type="date" #newJour class="field-input-sm" [min]="today">
+            <button type="button" class="btn-add-jour" (click)="ajouterJourPersonnalise(newJour.value); newJour.value=''">
+              <mat-icon>add</mat-icon> Ajouter
+            </button>
+          </div>
+          <div class="jours-bloques" *ngIf="joursPersonnalises.length > 0">
+            <div class="jour-bloque" *ngFor="let j of joursPersonnalises">
+              <mat-icon>block</mat-icon> {{ j }}
+              <button type="button" class="btn-remove" (click)="supprimerJourPersonnalise(j)"><mat-icon>close</mat-icon></button>
+            </div>
+          </div>
+          <div class="vide-msg" *ngIf="joursPersonnalises.length === 0">Aucun jour bloqué personnalisé</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SECTION 1 : DATE & HORAIRES ══════════════════════════════ -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-num">1</div>
+        <div><h2>Date, Horaires & Départ</h2><p>Planifiez la tournée et définissez le point de départ</p></div>
+      </div>
+      <div class="section-body">
+        <div class="field-row">
+          <div class="field field--lg">
+            <label class="field-label">
+              <mat-icon>calendar_today</mat-icon>
+              Date de tournée <span class="req">*</span>
+            </label>
+            <div class="field-input-wrap" [class.invalid]="form.get('dateTournee')?.invalid && form.get('dateTournee')?.touched">
+              <input type="date" formControlName="dateTournee" class="field-input" [min]="today" (change)="onDateChange($event)">
+            </div>
+            <div class="date-warning" *ngIf="dateErreur"><span>{{ dateErreur }}</span></div>
+            <span class="field-error" *ngIf="getError('dateTournee') && !dateErreur">{{ getError('dateTournee') }}</span>
+          </div>
+          <div class="field">
+            <label class="field-label"><mat-icon>schedule</mat-icon> Heure de départ</label>
+            <div class="field-input-wrap">
+              <input type="time" formControlName="heureDebut" class="field-input" min="07:00" max="18:00" (change)="onHeureChange($event, 'debut')">
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label"><mat-icon>schedule</mat-icon> Heure de fin</label>
+            <div class="field-input-wrap">
+              <input type="time" formControlName="heureFin" class="field-input" min="07:00" max="18:00" (change)="onHeureChange($event, 'fin')">
+            </div>
+          </div>
+        </div>
+        <div class="date-warning" *ngIf="heureErreur"><span>{{ heureErreur }}</span></div>
+        <div class="heure-hint">
+          <mat-icon>info</mat-icon>
+          Horaires de travail : 07h00 — 18h00 &nbsp;|&nbsp; Weekends non disponibles
+        </div>
+
+        <!-- ── Point de départ ── -->
+        <div class="depart-block">
+          <label class="field-label">
+            <mat-icon>my_location</mat-icon>
+            Point de départ <span class="req">*</span>
+          </label>
+          <p class="depart-desc">Adresse du dépôt ou entrepôt — utilisée comme origine sur la carte d'optimisation</p>
+          <div class="field-input-wrap depart-input-wrap"
+               [class.invalid]="form.get('adresseDepart')?.invalid && form.get('adresseDepart')?.touched">
+            <mat-icon class="depart-prefix">warehouse</mat-icon>
+            <input
+              type="text"
+              formControlName="adresseDepart"
+              class="field-input depart-input"
+              placeholder="Ex : Zone Industrielle Monastir, Route de Sousse..."
+              list="depart-suggestions"
+              autocomplete="off">
+          </div>
+          <datalist id="depart-suggestions">
+            <option value="Zone Industrielle Monastir"></option>
+            <option value="Zone Industrielle Sousse, Route de Tunis"></option>
+            <option value="Zone Industrielle Sfax, Route de Tunis"></option>
+            <option value="Zone Industrielle Ben Arous"></option>
+            <option value="Avenue Habib Bourguiba, Tunis"></option>
+            <option value="Route de Sfax, Mahdia"></option>
+            <option value="Centre Ville Nabeul"></option>
+            <option value="Zone Industrielle Bizerte"></option>
+          </datalist>
+          <span class="field-error"
+                *ngIf="form.get('adresseDepart')?.invalid && form.get('adresseDepart')?.touched">
+            L'adresse de départ est requise
+          </span>
+          <div class="depart-preview" *ngIf="form.get('adresseDepart')?.value">
+            <mat-icon>pin_drop</mat-icon>
+            <span>Départ enregistré : <strong>{{ form.get('adresseDepart')?.value }}</strong></span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ SECTION 2 : ZONE GÉOGRAPHIQUE ════════════════════════════ -->
+    <div class="form-section zone-section">
+      <div class="section-header">
+        <div class="section-num">2</div>
+        <div>
+          <h2>Zone de livraison</h2>
+          <p>Sélectionnez le gouvernorat, quartier et rue — les commandes de cette zone s'afficheront automatiquement</p>
+        </div>
+      </div>
+      <div class="section-body">
+
+        <div class="zone-selectors">
+          <!-- Gouvernorat -->
+          <div class="field">
+            <label class="field-label"><mat-icon>location_city</mat-icon> Gouvernorat</label>
+            <div class="field-select-wrap">
+              <mat-icon class="select-ico">map</mat-icon>
+              <select class="field-select" (change)="onGouvernoratChange($any($event.target).value)">
+                <option value="">— Tous les gouvernorats —</option>
+                <option *ngFor="let g of gouvernorats" [value]="g">{{ g }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Quartier / Délégation -->
+          <div class="field" *ngIf="gouvernoratSelectionne">
+            <label class="field-label"><mat-icon>holiday_village</mat-icon> Quartier / Délégation</label>
+            <div class="field-select-wrap">
+              <mat-icon class="select-ico">place</mat-icon>
+              <select class="field-select" (change)="onQuartierChange($any($event.target).value)">
+                <option value="">— Tous les quartiers —</option>
+                <option *ngFor="let q of quartiersDuGouvernorat" [value]="q">{{ q }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Rue -->
+          <div class="field" *ngIf="quartierSelectionne && ruesDuQuartier.length > 0">
+            <label class="field-label"><mat-icon>signpost</mat-icon> Rue / Avenue</label>
+            <div class="field-select-wrap">
+              <mat-icon class="select-ico">directions</mat-icon>
+              <select class="field-select" (change)="onRueChange($any($event.target).value)">
+                <option value="">— Toutes les rues —</option>
+                <option *ngFor="let r of ruesDuQuartier" [value]="r">{{ r }}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Adresse complète résultante -->
+        <div class="adresse-complete-badge" *ngIf="gouvernoratSelectionne">
+          <mat-icon>pin_drop</mat-icon>
+          <span>Zone sélectionnée : <strong>{{ getAdresseComplete() }}</strong></span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ SECTION 3 : CHAUFFEUR & VÉHICULE ═════════════════════════ -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-num">3</div>
+        <div>
+          <h2>Chauffeur & Véhicule</h2>
+          <p>Disponibilités calculées selon la date · Max {{ MAX_COMMANDES_PAR_JOUR }} livraisons/chauffeur/jour</p>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="info-banner" *ngIf="!form.get('dateTournee')?.value">
+          <mat-icon>info</mat-icon>
+          Sélectionnez d'abord une date pour voir les ressources disponibles
+        </div>
+        <div class="ressources-loading" *ngIf="loadingRessources">
+          <mat-progress-spinner mode="indeterminate" diameter="24"></mat-progress-spinner>
+          <span>Calcul des disponibilités...</span>
+        </div>
+
+        <div class="field-row" *ngIf="!loadingRessources && form.get('dateTournee')?.value">
+
+          <!-- Chauffeur -->
+          <div class="field">
+            <label class="field-label">
+              <mat-icon>person</mat-icon>
+              Chauffeur <span class="req">*</span>
+            </label>
+            <div class="field-select-wrap" [class.invalid]="form.get('chauffeurId')?.invalid && form.get('chauffeurId')?.touched">
+              <mat-icon class="select-ico">person</mat-icon>
+              <select formControlName="chauffeurId" class="field-select">
+                <option [ngValue]="null" disabled>-- Sélectionner --</option>
+                <option *ngFor="let c of chauffeurs" [ngValue]="c.id">
+                  {{ c.prenom }} {{ c.nom }}<ng-container *ngIf="c.telephone"> · {{ c.telephone }}</ng-container>
+                </option>
+              </select>
+            </div>
+            <p class="field-hint" *ngIf="chauffeurs.length === 0">⚠️ Aucun chauffeur disponible ce jour</p>
+            <span class="field-error" *ngIf="getError('chauffeurId')">{{ getError('chauffeurId') }}</span>
+          </div>
+
+          <!-- Véhicule -->
+          <div class="field">
+            <label class="field-label">
+              <mat-icon>local_shipping</mat-icon>
+              Véhicule <span class="req">*</span>
+            </label>
+            <div class="field-select-wrap" [class.invalid]="form.get('vehiculeId')?.invalid && form.get('vehiculeId')?.touched">
+              <mat-icon class="select-ico">local_shipping</mat-icon>
+              <select formControlName="vehiculeId" class="field-select">
+                <option [ngValue]="null" disabled>-- Sélectionner --</option>
+                <option *ngFor="let v of vehicules" [ngValue]="v.id">
+                  {{ v.marque }} {{ v.modele }} — {{ v.immatriculation }}
+                </option>
+              </select>
+            </div>
+            <p class="field-hint" *ngIf="vehicules.length === 0">⚠️ Aucun véhicule disponible ce jour</p>
+            <span class="field-error" *ngIf="getError('vehiculeId')">{{ getError('vehiculeId') }}</span>
+          </div>
+
+        </div>
+
+        <!-- Alerte capacité max atteinte -->
+        <div class="capacite-banner" *ngIf="chauffeurCapaciteAtteinte">
+          <mat-icon>warning_amber</mat-icon>
+          <div>
+            <strong>Capacité journalière atteinte</strong>
+            <span>Ce chauffeur a déjà {{ commandesSelectionnees.size }} / {{ MAX_COMMANDES_PAR_JOUR }} livraisons — Choisissez un autre chauffeur si nécessaire.</span>
+          </div>
+        </div>
+
+        <!-- Sélecteur chauffeur alternatif si limite atteinte -->
+        <div class="autre-chauffeur" *ngIf="chauffeurCapaciteAtteinte && chauffeurs.length > 1">
+          <mat-icon>swap_horiz</mat-icon>
+          <span>Réassigner à un autre chauffeur :</span>
+          <div class="field-select-wrap alt-select">
+            <mat-icon class="select-ico">person_add</mat-icon>
+            <select formControlName="chauffeurId" class="field-select">
+              <option [ngValue]="null" disabled>-- Autre chauffeur --</option>
+              <option *ngFor="let c of chauffeurs" [ngValue]="c.id">
+                {{ c.prenom }} {{ c.nom }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ SECTION 4 : COMMANDES ═════════════════════════════════════ -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-num">4</div>
+        <div>
+          <h2>Commandes à livrer</h2>
+          <p>
+            <span class="count-badge" [class.count-warn]="commandesSelectionnees.size >= MAX_COMMANDES_PAR_JOUR">
+              {{ commandesSelectionnees.size }} / {{ MAX_COMMANDES_PAR_JOUR }}
+            </span>
+            commande{{ commandesSelectionnees.size > 1 ? 's' : '' }} sélectionnée{{ commandesSelectionnees.size > 1 ? 's' : '' }}
+            <span *ngIf="gouvernoratSelectionne"> · Zone : <strong>{{ gouvernoratSelectionne }}</strong></span>
+          </p>
+        </div>
+      </div>
+      <div class="section-body">
+
+        <!-- Barre de progression livraisons -->
+        <div class="progress-livraisons" *ngIf="commandesSelectionnees.size > 0">
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-fill"
+                 [style.width.%]="(commandesSelectionnees.size / MAX_COMMANDES_PAR_JOUR) * 100"
+                 [class.progress-warn]="commandesSelectionnees.size >= MAX_COMMANDES_PAR_JOUR">
+            </div>
+          </div>
+          <span class="progress-label">{{ commandesSelectionnees.size }}/{{ MAX_COMMANDES_PAR_JOUR }} livraisons</span>
+        </div>
+
+        <!-- Aucune commande -->
+        <div class="commandes-empty" *ngIf="commandesFiltrees.length === 0">
+          <mat-icon>inbox</mat-icon>
+          <p *ngIf="gouvernoratSelectionne">Aucune commande en attente dans la zone <strong>{{ gouvernoratSelectionne }}</strong></p>
+          <p *ngIf="!gouvernoratSelectionne">Aucune commande en attente disponible</p>
+        </div>
+
+        <!-- Grille commandes -->
+        <div class="commandes-grid" *ngIf="commandesFiltrees.length > 0">
+          <div *ngFor="let c of commandesFiltrees"
+               class="commande-card"
+               [class.selected]="isCommandeSelected(c.id)"
+               [class.disabled-card]="!isCommandeSelected(c.id) && commandesSelectionnees.size >= MAX_COMMANDES_PAR_JOUR"
+               (click)="toggleCommande(c.id)">
+
+            <div class="commande-card__check">
+              <mat-icon>{{ isCommandeSelected(c.id) ? 'check_box' : 'check_box_outline_blank' }}</mat-icon>
+            </div>
+
+            <!-- Badge priorité -->
+            <div class="priorite-badge" [style.background]="getPrioriteColor(getPrioriteBadge(c))">
+              {{ getPrioriteBadge(c) }}
+            </div>
+
+            <div class="commande-card__body">
+              <code class="commande-ref">{{ c.numeroCommande }}</code>
+              <span class="commande-client">{{ c.clientNom }}</span>
+              <span class="commande-addr">
+                <mat-icon>place</mat-icon>
+                {{ c.adresseLivraison }}, {{ c.villeLivraison }}
+              </span>
+              <div class="commande-meta">
+                <span *ngIf="c.poids"><mat-icon>scale</mat-icon> {{ c.poids }} kg</span>
+                <span>📅 {{ c.dateLivraisonPrevue | date:'dd/MM/yyyy' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ SECTION 5 : OPTIMISATION ML ══════════════════════════════ -->
+    <div class="form-section optimisation-section">
+      <div class="section-header">
+        <div class="section-num">5</div>
+        <div>
+          <h2>Optimisation ML du itinéraire</h2>
+          <p>Algorithme Nearest Neighbor + Machine Learning — chemin le plus court par priorité</p>
+        </div>
+      </div>
+      <div class="section-body">
+
+        <!-- Bouton optimiser -->
+        <div class="optimiser-bar">
+          <button
+            class="btn-optimiser"
+            type="button"
+            (click)="lancerOptimisation()"
+            [disabled]="optimisationEnCours || commandesSelectionnees.size === 0">
+
+            <span class="btn-optimiser__icon" *ngIf="!optimisationEnCours">⚡</span>
+            <mat-spinner *ngIf="optimisationEnCours" diameter="20" style="display:inline-block"></mat-spinner>
+            <span>{{ optimisationEnCours ? 'Optimisation en cours...' : 'Optimiser le trajet' }}</span>
+          </button>
+
+          <div class="optimiser-hint" *ngIf="commandesSelectionnees.size === 0">
+            Sélectionnez au moins une commande pour activer l'optimisation
+          </div>
+
+          <!-- Résultat rapide -->
+          <div class="optimiser-result" *ngIf="optimisationResultat">
+            <mat-icon style="color:#38a169">check_circle</mat-icon>
+            <span>Chemin optimisé : <strong>{{ (optimisationResultat.distanceTotale || 0) | number:'1.1-1' }} km</strong></span>
+            <span class="ordre-badge">{{ ordreOptimise.length }} arrêts ordonnés</span>
+          </div>
+        </div>
+
+        <!-- Légende étapes ML -->
+        <div class="ml-etapes" *ngIf="!optimisationResultat">
+          <div class="ml-etape">
+            <div class="ml-etape__icon">📦</div>
+            <div><strong>Étape 1</strong><span>Commandes sélectionnées</span></div>
+          </div>
+          <div class="ml-arrow">→</div>
+          <div class="ml-etape">
+            <div class="ml-etape__icon">⭐</div>
+            <div><strong>Étape 2</strong><span>Tri par priorité</span></div>
+          </div>
+          <div class="ml-arrow">→</div>
+          <div class="ml-etape">
+            <div class="ml-etape__icon">🤖</div>
+            <div><strong>Étape 3</strong><span>Nearest Neighbor ML</span></div>
+          </div>
+          <div class="ml-arrow">→</div>
+          <div class="ml-etape">
+            <div class="ml-etape__icon">🗺️</div>
+            <div><strong>Étape 4</strong><span>Carte + itinéraire</span></div>
+          </div>
+        </div>
+
+        <!-- Ordre optimisé -->
+        <div class="ordre-optimise" *ngIf="ordreOptimise.length > 0">
+          <div class="ordre-titre"><mat-icon>route</mat-icon> Ordre de passage optimisé :</div>
+          <div class="ordre-liste">
+            <div *ngFor="let id of ordreOptimise; let i = index" class="ordre-item">
+              <span class="ordre-num">{{ i + 1 }}</span>
+              <span class="ordre-commande">
+                {{ commandes | pureFilter:id }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Carte -->
+        <div class="carte-section" *ngIf="optimisationResultat">
+          <div class="carte-header">
+            <h3>🗺️ Itinéraire optimisé sur la carte</h3>
+            <div class="carte-legende">
+              <span class="legende-item"><span class="dot depot"></span> Dépôt</span>
+              <span class="legende-item"><span class="dot livraison"></span> Livraisons (dans l'ordre)</span>
+            </div>
+          </div>
+          <div id="carte-optimisation-tournee" class="carte-container"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ SECTION 6 : INFOS COMPLÉMENTAIRES ════════════════════════ -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-num">6</div>
+        <div><h2>Informations complémentaires</h2><p>Distance et remarques</p></div>
+      </div>
+      <div class="section-body">
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label"><mat-icon>route</mat-icon> Distance totale (km)</label>
+            <div class="field-input-wrap">
+              <input type="number" formControlName="distanceTotale" class="field-input" placeholder="Ex: 145" min="0">
+              <span class="unit-badge">km</span>
+            </div>
+          </div>
+        </div>
+        <div class="field field--full">
+          <label class="field-label"><mat-icon>notes</mat-icon> Remarques</label>
+          <textarea formControlName="remarques" class="field-textarea" rows="3"
+                    placeholder="Instructions spéciales, informations complémentaires..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="form-footer">
+      <button type="button" mat-stroked-button (click)="retour()">Annuler</button>
+      <button type="submit" mat-flat-button class="btn-submit" (click)="soumettre()" [disabled]="saving">
+        <mat-spinner *ngIf="saving" diameter="18"></mat-spinner>
+        <mat-icon *ngIf="!saving">{{ isEdit ? 'save' : 'check_circle' }}</mat-icon>
+        {{ isEdit ? 'Enregistrer les modifications' : 'Créer la tournée' }}
+      </button>
+    </div>
+
+  </form>
+</div>

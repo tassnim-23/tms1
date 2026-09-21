@@ -1,0 +1,190 @@
+<!-- ✅ FRONTEND - CommandesComponent HTML Template -->
+<!-- Fichier: tms-frontend/tms-frontend/src/app/modules/client-dashboard/components/commandes/commandes.component.html -->
+
+<div class="commandes-container">
+  <div class="header-section">
+    <h1>Créer une Nouvelle Commande</h1>
+    <button mat-raised-button color="primary" 
+            (click)="showCreateForm = !showCreateForm"
+            class="create-button">
+      <mat-icon>add</mat-icon>
+      {{ showCreateForm ? 'Annuler' : 'Nouvelle Commande' }}
+    </button>
+  </div>
+
+  <!-- Formulaire création -->
+  <mat-card *ngIf="showCreateForm" class="create-form-card">
+    <mat-card-header>
+      <mat-card-title>Détails de la Commande</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="createForm" (ngSubmit)="creerCommande()" class="commande-form">
+        
+        <!-- Row 1: Origine & Destination -->
+        <div class="form-row">
+          <mat-form-field appearance="fill" class="form-field">
+            <mat-label>Lieu de départ *</mat-label>
+            <input matInput formControlName="origine" placeholder="Ex: Alger">
+            <mat-error *ngIf="createForm.get('origine')?.hasError('required')">
+              Obligatoire
+            </mat-error>
+            <mat-error *ngIf="createForm.get('origine')?.hasError('minlength')">
+              Minimum 3 caractères
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="form-field">
+            <mat-label>Lieu de destination *</mat-label>
+            <input matInput formControlName="destination" placeholder="Ex: Oran">
+            <mat-error *ngIf="createForm.get('destination')?.hasError('required')">
+              Obligatoire
+            </mat-error>
+            <mat-error *ngIf="createForm.get('destination')?.hasError('minlength')">
+              Minimum 3 caractères
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Row 2: Date & Type -->
+        <div class="form-row">
+          <mat-form-field appearance="fill" class="form-field">
+            <mat-label>Date de départ *</mat-label>
+            <input matInput formControlName="dateDepart" type="date">
+            <mat-error *ngIf="createForm.get('dateDepart')?.hasError('required')">
+              Obligatoire
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="form-field">
+            <mat-label>Type de transport *</mat-label>
+            <mat-select formControlName="type">
+              <mat-option *ngFor="let type of typesTransport" [value]="type">
+                {{ type }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="createForm.get('type')?.hasError('required')">
+              Obligatoire
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Row 3: Poids & Description -->
+        <div class="form-row">
+          <mat-form-field appearance="fill" class="form-field">
+            <mat-label>Poids (kg) *</mat-label>
+            <input matInput formControlName="poids" type="number" min="0.1" step="0.1">
+            <mat-error *ngIf="createForm.get('poids')?.hasError('required')">
+              Obligatoire
+            </mat-error>
+            <mat-error *ngIf="createForm.get('poids')?.hasError('min')">
+              Doit être > 0
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="form-field">
+            <mat-label>Description (optionnel)</mat-label>
+            <textarea matInput formControlName="description" 
+                      placeholder="Détails supplémentaires..." rows="3"></textarea>
+            <mat-error *ngIf="createForm.get('description')?.hasError('maxlength')">
+              Maximum 500 caractères
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Buttons -->
+        <div class="form-actions">
+          <button mat-raised-button color="primary" 
+                  type="submit"
+                  [disabled]="createForm.invalid || creatingCommande">
+            <mat-icon *ngIf="!creatingCommande">send</mat-icon>
+            <mat-spinner *ngIf="creatingCommande" diameter="20"></mat-spinner>
+            {{ creatingCommande ? 'Création...' : 'Créer la Commande' }}
+          </button>
+          <button mat-button type="reset" (click)="resetForm()">
+            Annuler
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Historique des commandes -->
+  <div class="historique-section">
+    <h2>Mes Commandes</h2>
+
+    <!-- Loading spinner -->
+    <div *ngIf="loadingCommandes" class="loading-container">
+      <mat-spinner></mat-spinner>
+      <p>Chargement des commandes...</p>
+    </div>
+
+    <!-- Commandes table -->
+    <mat-card *ngIf="!loadingCommandes">
+      <mat-card-content>
+        <div *ngIf="mesCommandes.length === 0" class="no-data">
+          <p>Aucune commande. 
+            <a href="javascript:void(0)" (click)="showCreateForm = true">Créez votre première commande</a>
+          </p>
+        </div>
+
+        <table *ngIf="mesCommandes.length > 0" mat-table [dataSource]="mesCommandes" class="commandes-table">
+          
+          <!-- Reference Column -->
+          <ng-container matColumnDef="reference">
+            <th mat-header-cell *matHeaderCellDef>Référence</th>
+            <td mat-cell *matCellDef="let element">{{ element.reference }}</td>
+          </ng-container>
+
+          <!-- Origine Column -->
+          <ng-container matColumnDef="origine">
+            <th mat-header-cell *matHeaderCellDef>Départ</th>
+            <td mat-cell *matCellDef="let element">{{ element.origine }}</td>
+          </ng-container>
+
+          <!-- Destination Column -->
+          <ng-container matColumnDef="destination">
+            <th mat-header-cell *matHeaderCellDef>Destination</th>
+            <td mat-cell *matCellDef="let element">{{ element.destination }}</td>
+          </ng-container>
+
+          <!-- Date Column -->
+          <ng-container matColumnDef="dateDepart">
+            <th mat-header-cell *matHeaderCellDef>Date</th>
+            <td mat-cell *matCellDef="let element">{{ formatDate(element.dateDepart) }}</td>
+          </ng-container>
+
+          <!-- Type Column -->
+          <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef>Type</th>
+            <td mat-cell *matCellDef="let element">{{ element.type }}</td>
+          </ng-container>
+
+          <!-- Statut Column -->
+          <ng-container matColumnDef="statut">
+            <th mat-header-cell *matHeaderCellDef>Statut</th>
+            <td mat-cell *matCellDef="let element">
+              <span class="badge" [class]="'badge-' + element.statut.toLowerCase()">
+                {{ element.statut }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let element">
+              <button mat-icon-button matTooltip="Voir détails" 
+                      (click)="voirDetail(element)">
+                <mat-icon>visibility</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

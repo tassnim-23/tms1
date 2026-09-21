@@ -1,0 +1,110 @@
+<!-- ✅ FRONTEND - MonProfilComponent HTML Template -->
+<!-- Fichier: tms-frontend/tms-frontend/src/app/modules/client-dashboard/components/mon-profil/mon-profil.component.html -->
+
+<div class="profil-container">
+  <h1>Mon Profil</h1>
+
+  <!-- Loading spinner -->
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner></mat-spinner>
+    <p>Chargement du profil...</p>
+  </div>
+
+  <!-- Profil form -->
+  <mat-card *ngIf="!loading" class="profil-card">
+    <mat-card-header>
+      <mat-card-title>Informations de l'Entreprise</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="profilForm" (ngSubmit)="saveProfil()" class="profil-form">
+        
+        <!-- Row 1: Raison Sociale -->
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Raison Sociale *</mat-label>
+          <input matInput formControlName="raisonSociale" placeholder="Nom de votre entreprise">
+          <mat-error *ngIf="profilForm.get('raisonSociale')?.hasError('required')">
+            Obligatoire
+          </mat-error>
+          <mat-error *ngIf="profilForm.get('raisonSociale')?.hasError('minlength')">
+            Minimum 3 caractères
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Row 2: Email & Téléphone -->
+        <div class="form-row">
+          <mat-form-field appearance="fill" class="form-field">
+            <mat-label>Email *</mat-label>
+            <input matInput formControlName="email" type="email" placeholder="email@exemple.com">
+            <mat-error *ngIf="profilForm.get('email')?.hasError('required')">
+              Obligatoire
+            </mat-error>
+            <mat-error *ngIf="profilForm.get('email')?.hasError('email')">
+              Email invalide
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="form-field">
+            <mat-label>Téléphone *</mat-label>
+            <input matInput formControlName="telephone" placeholder="+213 123 456 789">
+            <mat-error *ngIf="profilForm.get('telephone')?.hasError('required')">
+              Obligatoire
+            </mat-error>
+            <mat-error *ngIf="profilForm.get('telephone')?.hasError('pattern')">
+              Format invalide
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Row 3: Matricule Fiscal & Activité -->
+        <div class="form-row">
+          <mat-form-field appearance="fill" class="form-field">
+            <mat-label>Matricule Fiscal *</mat-label>
+            <input matInput formControlName="matriculeFiscale" placeholder="Votre matricule fiscal">
+            <mat-error *ngIf="profilForm.get('matriculeFiscale')?.hasError('required')">
+              Obligatoire
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="form-field">
+            <mat-label>Activité *</mat-label>
+            <input matInput formControlName="activite" placeholder="Type d'activité">
+            <mat-error *ngIf="profilForm.get('activite')?.hasError('required')">
+              Obligatoire
+            </mat-error>
+            <mat-error *ngIf="profilForm.get('activite')?.hasError('minlength')">
+              Minimum 3 caractères
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Row 4: Adresse -->
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Adresse Complète *</mat-label>
+          <textarea matInput formControlName="adresseComplete" 
+                    placeholder="Adresse complète de votre entreprise" rows="3"></textarea>
+          <mat-error *ngIf="profilForm.get('adresseComplete')?.hasError('required')">
+            Obligatoire
+          </mat-error>
+          <mat-error *ngIf="profilForm.get('adresseComplete')?.hasError('minlength')">
+            Minimum 10 caractères
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Action buttons -->
+        <div class="form-actions">
+          <button mat-raised-button color="primary" 
+                  type="submit"
+                  [disabled]="profilForm.invalid || updating">
+            <mat-icon *ngIf="!updating">save</mat-icon>
+            <mat-spinner *ngIf="updating" diameter="20"></mat-spinner>
+            {{ updating ? 'Mise à jour...' : 'Sauvegarder' }}
+          </button>
+          <button mat-button type="reset" (click)="resetForm()">
+            Annuler
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

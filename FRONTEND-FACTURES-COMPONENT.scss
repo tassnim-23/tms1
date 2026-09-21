@@ -1,0 +1,119 @@
+/* ✅ FRONTEND - FacturesComponent SCSS */
+/* Fichier: tms-frontend/tms-frontend/src/app/modules/client-dashboard/components/factures/factures.component.scss */
+
+.factures-container {
+  padding: 20px;
+
+  h1 {
+    margin-top: 0;
+    color: #333;
+    font-size: 2rem;
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+
+  p {
+    margin-top: 20px;
+    color: #666;
+  }
+}
+
+.factures-content {
+  margin-top: 20px;
+}
+
+mat-card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+mat-card-header {
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee;
+
+  mat-card-title {
+    font-size: 1.3rem;
+    color: #333;
+  }
+}
+
+.no-data {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: #999;
+  font-size: 1.1rem;
+
+  p {
+    margin: 0;
+  }
+}
+
+.factures-table {
+  width: 100%;
+  margin-top: 20px;
+
+  th {
+    background-color: #f5f5f5;
+    font-weight: 600;
+    color: #333;
+  }
+
+  td {
+    border-bottom: 1px solid #eee;
+  }
+
+  tr:hover {
+    background-color: #fafafa;
+  }
+}
+
+.badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+
+  &.badge-en_attente {
+    background-color: #fff3cd;
+    color: #856404;
+  }
+
+  &.badge-payee {
+    background-color: #d4edda;
+    color: #155724;
+  }
+
+  &.badge-annulee {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+}
+
+.action-button {
+  margin: 0;
+  
+  mat-icon {
+    margin-right: 5px;
+  }
+}
+
+@media (max-width: 768px) {
+  .factures-container {
+    padding: 10px;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  .factures-table {
+    font-size: 0.9rem;
+  }
+}

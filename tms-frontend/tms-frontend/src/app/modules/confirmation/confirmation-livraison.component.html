@@ -1,0 +1,91 @@
+<div class="confirmation-wrapper">
+
+  <!-- HEADER -->
+  <div class="conf-header">
+    <span class="logo-icon">🚛</span>
+    <span class="logo-text">TMS — GRPO Consulting</span>
+  </div>
+
+  <div class="conf-card">
+
+    <!-- ── CHARGEMENT ───────────────────────────────── -->
+    <ng-container *ngIf="etat === 'chargement'">
+      <div class="state-loading">
+        <div class="spinner"></div>
+        <p>Traitement en cours...</p>
+      </div>
+    </ng-container>
+
+    <!-- ── FORMULAIRE REFUS ──────────────────────────── -->
+    <ng-container *ngIf="etat === 'formulaire_refus'">
+      <div class="state-icon">❌</div>
+      <h1 class="state-title refuse">Vous ne serez pas disponible ?</h1>
+      <p class="state-subtitle">
+        Votre commande sera automatiquement replanifiée à un autre créneau.<br>
+        Vous pouvez indiquer un motif (optionnel).
+      </p>
+      <div class="motif-form">
+        <label for="motif">Motif (optionnel)</label>
+        <textarea
+          id="motif"
+          [(ngModel)]="motifRefus"
+          placeholder="Ex : Je suis absent ce jour-là, je préfère le matin..."
+          rows="3">
+        </textarea>
+      </div>
+      <div class="btn-row">
+        <button class="btn-refuse" (click)="refuser()">
+          ❌ Confirmer mon refus
+        </button>
+        <button class="btn-secondary" (click)="retourConfirmer()">
+          ✅ Finalement, je serai là
+        </button>
+      </div>
+    </ng-container>
+
+    <!-- ── SUCCÈS CONFIRMÉ ───────────────────────────── -->
+    <ng-container *ngIf="etat === 'succes_confirme'">
+      <div class="state-icon">✅</div>
+      <h1 class="state-title confirm">Livraison confirmée !</h1>
+      <p class="state-subtitle">
+        Merci ! Votre livraison pour la commande <strong>{{ numeroCommande }}</strong>
+        est bien confirmée.<br>Notre chauffeur sera chez vous dans le créneau prévu.
+      </p>
+      <div class="info-box confirm-box">
+        <p>📦 Pensez à être disponible à l'adresse de livraison dans le créneau indiqué.</p>
+      </div>
+      <p class="contact-note">Une question ? Contactez notre service client.</p>
+    </ng-container>
+
+    <!-- ── SUCCÈS REFUSÉ ─────────────────────────────── -->
+    <ng-container *ngIf="etat === 'succes_refuse'">
+      <div class="state-icon">📅</div>
+      <h1 class="state-title refuse">Refus enregistré</h1>
+      <p class="state-subtitle">
+        Votre refus pour la commande <strong>{{ numeroCommande }}</strong>
+        a bien été pris en compte.<br>
+        Notre équipe va replanifier votre livraison à un autre créneau.
+      </p>
+      <div class="info-box refuse-box">
+        <p>🔔 Vous recevrez un nouvel email dès qu'un nouveau créneau sera disponible.</p>
+      </div>
+      <p class="contact-note">Une question ? Contactez notre service client.</p>
+    </ng-container>
+
+    <!-- ── ERREUR ────────────────────────────────────── -->
+    <ng-container *ngIf="etat === 'erreur'">
+      <div class="state-icon">⚠️</div>
+      <h1 class="state-title error">Lien invalide ou expiré</h1>
+      <p class="state-subtitle">{{ message }}</p>
+      <div class="info-box error-box">
+        <p>Ce lien est valable 48h. S'il a expiré, veuillez contacter notre service client.</p>
+      </div>
+    </ng-container>
+
+  </div>
+
+  <div class="conf-footer">
+    © 2024 GRPO Consulting — Transport Management System
+  </div>
+
+</div>

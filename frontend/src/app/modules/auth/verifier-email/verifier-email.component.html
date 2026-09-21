@@ -1,0 +1,58 @@
+<div class="verify-shell">
+  <div class="verify-card">
+
+    <div class="verify-card__header">
+      <div class="verify-icon">🔐</div>
+      <h1>Vérification de votre email</h1>
+      <p>Un code à 6 chiffres a été envoyé à votre adresse email lors de l'approbation de votre compte.</p>
+    </div>
+
+    <div class="verify-success" *ngIf="success">
+      <div class="success-icon">✅</div>
+      <h2>Email vérifié !</h2>
+      <p>Votre compte est maintenant actif. Redirection vers la connexion...</p>
+    </div>
+
+    <form (ngSubmit)="soumettre()" *ngIf="!success" novalidate>
+
+      <div class="field">
+        <label>VOTRE ADRESSE EMAIL</label>
+        <div class="input-wrap">
+          <span class="ico">✉️</span>
+          <input type="email" [(ngModel)]="email" name="email" placeholder="votre@email.com">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>CODE DE VÉRIFICATION</label>
+        <div class="code-inputs">
+          <input id="d0" type="text" inputmode="numeric" maxlength="1" class="code-digit"
+                 (keydown)="onKey($event, 0)" autocomplete="off">
+          <input id="d1" type="text" inputmode="numeric" maxlength="1" class="code-digit"
+                 (keydown)="onKey($event, 1)" autocomplete="off">
+          <input id="d2" type="text" inputmode="numeric" maxlength="1" class="code-digit"
+                 (keydown)="onKey($event, 2)" autocomplete="off">
+          <input id="d3" type="text" inputmode="numeric" maxlength="1" class="code-digit"
+                 (keydown)="onKey($event, 3)" autocomplete="off">
+          <input id="d4" type="text" inputmode="numeric" maxlength="1" class="code-digit"
+                 (keydown)="onKey($event, 4)" autocomplete="off">
+          <input id="d5" type="text" inputmode="numeric" maxlength="1" class="code-digit"
+                 (keydown)="onKey($event, 5)" autocomplete="off">
+        </div>
+        <p class="field-hint">Entrez le code reçu par email (valable 24h)</p>
+      </div>
+
+      <div class="alert-error" *ngIf="error">❌ {{ error }}</div>
+
+      <button type="submit" class="btn-verify" [disabled]="loading || code.length < 6">
+        <span *ngIf="loading">⏳ Vérification...</span>
+        <span *ngIf="!loading">✅ Vérifier mon email</span>
+      </button>
+
+      <div class="back-link">
+        <a routerLink="/login">← Retour à la connexion</a>
+      </div>
+
+    </form>
+  </div>
+</div>

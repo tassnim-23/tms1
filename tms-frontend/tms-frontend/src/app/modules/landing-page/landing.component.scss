@@ -1,0 +1,68 @@
+// ═══════════════════════════════════════════════════════════════
+// ✅ STYLES POUR LES IMAGES CUSTOM
+// ═══════════════════════════════════════════════════════════════
+
+.feature-img {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: drop-shadow(0 3px 10px rgba(0, 0, 0, 0.12));
+}
+
+.feature-card:hover .feature-img {
+  transform: scale(1.2) rotate(-8deg);
+  filter: drop-shadow(0 6px 16px rgba(27, 79, 114, 0.3));
+}
+
+.step-img {
+  width: 45px;
+  height: 45px;
+  object-fit: contain;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1));
+}
+
+.step-circle:hover .step-img {
+  transform: translate(-50%, -50%) scale(1.25) rotate(10deg);
+}
+
+.module-icon-img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  flex-shrink: 0;
+  margin-right: 16px;
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.1));
+}
+
+.module-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.module-card:hover .module-icon-img {
+  transform: scale(1.15) translateX(-6px);
+  filter: drop-shadow(0 4px 12px rgba(27, 79, 114, 0.25));
+}
+
+// ✅ Ajustement pour que le step-emoji ne soit plus affiché
+.step-emoji {
+  display: none !important;
+}
+
+// ✅ Ajustement pour que le feature-emoji ne soit plus affiché
+.feature-emoji {
+  display: none !important;
+}
+
+// ✅ Ajustement pour que le module-icon ne soit plus affiché
+.module-icon {
+  display: none !important;
+}

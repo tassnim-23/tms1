@@ -1,0 +1,112 @@
+<div class="detail-shell">
+
+  <!-- Loading -->
+  <div class="detail-loading" *ngIf="loading">
+    <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+  </div>
+
+  <ng-container *ngIf="!loading && tournee">
+
+    <!-- Header -->
+    <header class="detail-header">
+      <button class="back-btn" (click)="retour()"><mat-icon>arrow_back</mat-icon></button>
+      <div class="detail-title">
+        <span class="statut-badge"
+              [style.background]="getStatutConfig(tournee.statut).bg"
+              [style.color]="getStatutConfig(tournee.statut).color"
+              [style.border-color]="getStatutConfig(tournee.statut).border">
+          <mat-icon>{{ getStatutConfig(tournee.statut).icon }}</mat-icon>
+          {{ getStatutConfig(tournee.statut).label }}
+        </span>
+        <h1>{{ tournee.numeroTournee }}</h1>
+        <p>{{ formatDate(tournee.dateTournee) }}</p>
+      </div>
+      <div class="detail-actions" *ngIf="tournee.statut === 'PLANIFIEE'">
+        <button mat-stroked-button (click)="supprimer()" class="btn-delete">
+          <mat-icon>delete_outline</mat-icon> Supprimer
+        </button>
+        <button mat-flat-button (click)="modifier()" class="btn-edit">
+          <mat-icon>edit</mat-icon> Modifier
+        </button>
+      </div>
+    </header>
+
+    <!-- Cards row -->
+    <div class="cards-row">
+
+      <!-- Chauffeur -->
+      <div class="info-card">
+        <div class="info-card__header"><mat-icon>person</mat-icon> Chauffeur</div>
+        <div class="info-card__avatar" [style.background]="'#1B4F72'">
+          {{ tournee.chauffeurNom?.charAt(0) }}
+        </div>
+        <div class="info-card__name">{{ tournee.chauffeurNom }}</div>
+        <div class="info-card__meta" *ngIf="tournee.chauffeurTelephone">
+          <mat-icon>phone</mat-icon> {{ tournee.chauffeurTelephone }}
+        </div>
+      </div>
+
+      <!-- Véhicule -->
+      <div class="info-card">
+        <div class="info-card__header"><mat-icon>local_shipping</mat-icon> Véhicule</div>
+        <div class="info-card__icon-big"><mat-icon>local_shipping</mat-icon></div>
+        <div class="info-card__name">{{ tournee.vehiculeLabel }}</div>
+      </div>
+
+      <!-- Horaires -->
+      <div class="info-card">
+        <div class="info-card__header"><mat-icon>schedule</mat-icon> Horaires</div>
+        <div class="horaires">
+          <div class="horaire-item">
+            <span class="horaire-label">Départ</span>
+            <span class="horaire-val">{{ tournee.heureDebut || '—' }}</span>
+          </div>
+          <div class="horaire-sep">→</div>
+          <div class="horaire-item">
+            <span class="horaire-label">Fin</span>
+            <span class="horaire-val">{{ tournee.heureFin || '—' }}</span>
+          </div>
+        </div>
+        <div class="distance" *ngIf="tournee.distanceTotale">
+          <mat-icon>route</mat-icon> {{ tournee.distanceTotale }} km prévus
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Commandes -->
+    <div class="commandes-section">
+      <div class="commandes-header">
+        <mat-icon>inventory_2</mat-icon>
+        <h2>Commandes à livrer</h2>
+        <span class="nb-badge">{{ tournee.nombreCommandes }}</span>
+      </div>
+
+      <div class="commandes-list" *ngIf="tournee.commandes?.length">
+        <div *ngFor="let c of tournee.commandes; let i = index" class="commande-item">
+          <div class="ordre-badge">{{ i + 1 }}</div>
+          <div class="commande-info">
+            <code class="commande-ref">{{ c.numeroCommande }}</code>
+            <span class="commande-client">{{ c.clientNom }}</span>
+            <span class="commande-addr"><mat-icon>place</mat-icon>{{ c.adresseLivraison }}, {{ c.villeLivraison }}</span>
+          </div>
+          <span class="commande-statut">{{ c.statut }}</span>
+        </div>
+      </div>
+
+      <div class="commandes-empty" *ngIf="!tournee.commandes?.length">
+        Aucune commande assignée
+      </div>
+    </div>
+
+    <!-- Remarques -->
+    <div class="remarques-section" *ngIf="tournee.remarques">
+      <mat-icon>notes</mat-icon>
+      <div>
+        <h3>Remarques</h3>
+        <p>{{ tournee.remarques }}</p>
+      </div>
+    </div>
+
+  </ng-container>
+</div>

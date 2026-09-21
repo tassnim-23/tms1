@@ -1,0 +1,126 @@
+.profil-container {
+  max-width: 700px;
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  h2 {
+    margin-top: 0;
+    color: #333;
+  }
+
+  .loading {
+    padding: 20px;
+    text-align: center;
+    color: #666;
+  }
+
+  .error-message, .success-message {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+  }
+
+  .error-message {
+    background: #ffebee;
+    color: #c62828;
+    border: 1px solid #ef5350;
+  }
+
+  .success-message {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #66bb6a;
+  }
+
+  .profile-card {
+    .view-mode, .edit-mode {
+      .profile-field {
+        margin-bottom: 20px;
+        padding: 15px;
+        background: #f9f9f9;
+        border-radius: 4px;
+
+        label {
+          display: block;
+          font-weight: bold;
+          color: #666;
+          margin-bottom: 5px;
+        }
+
+        span {
+          color: #333;
+          font-size: 1rem;
+        }
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+
+        label {
+          display: block;
+          font-weight: bold;
+          color: #666;
+          margin-bottom: 8px;
+        }
+
+        .form-control {
+          width: 100%;
+          padding: 10px;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          font-size: 1rem;
+
+          &:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+          }
+        }
+
+        textarea.form-control {
+          resize: vertical;
+          min-height: 80px;
+        }
+      }
+
+      .button-group {
+        display: flex;
+        gap: 10px;
+        margin-top: 30px;
+      }
+    }
+
+    .btn-edit, .btn-save, .btn-cancel {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.3s;
+
+      &:hover {
+        opacity: 0.8;
+      }
+    }
+
+    .btn-edit {
+      background: #667eea;
+      color: white;
+      width: 100%;
+    }
+
+    .btn-save {
+      background: #388e3c;
+      color: white;
+      flex: 1;
+    }
+
+    .btn-cancel {
+      background: #ccc;
+      color: #333;
+      flex: 1;
+    }
+  }
+}

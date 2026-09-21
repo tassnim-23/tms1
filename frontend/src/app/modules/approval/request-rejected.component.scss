@@ -1,0 +1,60 @@
+// Même style que waiting-approval.component.scss - voir ce fichier
+.approval-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+
+  .approval-card {
+    background: white;
+    padding: 50px;
+    border-radius: 10px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    max-width: 500px;
+
+    .icon {
+      font-size: 80px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      color: #f44336;
+      margin: 20px 0;
+    }
+
+    p {
+      color: #666;
+      line-height: 1.6;
+      margin: 15px 0;
+
+      &.contact-info {
+        font-style: italic;
+        color: #667eea;
+        font-weight: bold;
+      }
+    }
+
+    .btn-logout {
+      padding: 12px 30px;
+      margin-top: 30px;
+      background: #f44336;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.3s;
+
+      &:hover {
+        background: #d32f2f;
+      }
+    }
+
+    &.rejected {
+      border-left: 5px solid #f44336;
+    }
+  }
+}

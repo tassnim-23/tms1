@@ -1,0 +1,392 @@
+<!-- ══════════════════════════════════════════════════════════════════
+     GRPO TMS — Gestion des Commandes
+     Design : Flexport / Linear / Stripe level
+     ══════════════════════════════════════════════════════════════════ -->
+
+<div class="cmd-page">
+
+  <!-- ── PAGE HEADER ────────────────────────────────────────────── -->
+  <header class="page-header">
+    <div class="page-header__left">
+      <div class="page-header__breadcrumb">
+        <span class="breadcrumb-item">Transport</span>
+        <mat-icon class="breadcrumb-sep">chevron_right</mat-icon>
+        <span class="breadcrumb-item breadcrumb-item--active">Commandes</span>
+      </div>
+      <h1 class="page-title">
+        <mat-icon class="page-title__icon">inventory_2</mat-icon>
+        Gestion des Commandes
+        <span class="page-title__count" *ngIf="!loading">{{ stats.total }}</span>
+      </h1>
+    </div>
+    <div class="page-header__actions">
+      <button mat-icon-button (click)="charger()" matTooltip="Actualiser" class="refresh-btn">
+        <mat-icon [class.spin]="loading">refresh</mat-icon>
+      </button>
+      <button mat-flat-button class="btn-primary" (click)="nouvelleCommande()">
+        <mat-icon>add</mat-icon>
+        Nouvelle commande
+      </button>
+    </div>
+  </header>
+
+  <!-- ── KPI CARDS ──────────────────────────────────────────────── -->
+  <section class="kpi-grid">
+    <div *ngFor="let k of kpiCards"
+         class="kpi-card"
+         [class.kpi-card--active]="filtreStatut === k.statut"
+         [style.--kpi-color]="k.color"
+         [style.--kpi-bg]="k.bg"
+         (click)="setFiltreStatut(k.statut)">
+      <div class="kpi-card__icon">{{ k.icon }}</div>
+      <div class="kpi-card__body">
+        <div class="kpi-card__num">
+          <ng-container *ngIf="!loading">{{ k.val }}</ng-container>
+          <span *ngIf="loading" class="skel skel--sm"></span>
+        </div>
+        <div class="kpi-card__label">{{ k.label }}</div>
+      </div>
+      <div class="kpi-card__progress" *ngIf="!loading && k.statut !== 'TOUS' && stats.total > 0">
+        <div class="kpi-card__progress-bar"
+             [style.width]="(k.val / stats.total * 100) + '%'">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── BULK ACTION BAR ────────────────────────────────────────── -->
+  <div class="bulk-bar" *ngIf="selected.size > 0">
+    <div class="bulk-bar__left">
+      <mat-icon>check_circle</mat-icon>
+      <strong>{{ selected.size }}</strong> commande{{ selected.size > 1 ? 's' : '' }} sélectionnée{{ selected.size > 1 ? 's' : '' }}
+    </div>
+    <div class="bulk-bar__actions">
+      <button mat-stroked-button>
+        <mat-icon>assignment</mat-icon> Assigner à tournée
+      </button>
+      <button mat-stroked-button>
+        <mat-icon>swap_horiz</mat-icon> Changer statut
+      </button>
+      <button mat-stroked-button>
+        <mat-icon>file_download</mat-icon> Exporter
+      </button>
+      <button mat-stroked-button class="btn-danger-outline" (click)="selected.clear(); selectAll=false">
+        <mat-icon>close</mat-icon> Désélectionner
+      </button>
+    </div>
+  </div>
+
+  <!-- ── TOOLBAR ────────────────────────────────────────────────── -->
+  <div class="toolbar">
+    <!-- Recherche -->
+    <div class="search-wrap">
+      <mat-icon class="search-ico">search</mat-icon>
+      <input class="search-input" type="text" [formControl]="searchCtrl"
+             placeholder="Rechercher par n°, client, adresse, ville...">
+      <button *ngIf="searchCtrl.value" class="search-clear"
+              (click)="searchCtrl.setValue('')">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- Filtre statut chips -->
+    <div class="filter-chips">
+      <button *ngFor="let s of STATUTS"
+              class="chip"
+              [class.chip--active]="filtreStatut === s"
+              (click)="setFiltreStatut(s)">
+        <span *ngIf="s !== 'TOUS'">{{ getStatutCfg(s)?.icon }}</span>
+        {{ s === 'TOUS' ? 'Tous' : getStatutCfg(s)?.label }}
+        <span class="chip__count">
+          {{ s === 'TOUS' ? stats.total : (s === 'EN_ATTENTE' ? stats.enAttente : s === 'ASSIGNEE' ? stats.assignee : s === 'EN_COURS' ? stats.enCours : s === 'LIVREE' ? stats.livree : stats.annulee) }}
+        </span>
+      </button>
+    </div>
+
+    <!-- Filtre point de départ -->
+    <div class="filtre-depart-wrap">
+      <mat-icon class="filtre-depart-ico">warehouse</mat-icon>
+      <select class="filtre-depart-select"
+              [(ngModel)]="filtrePointDepart"
+              (change)="page=0; appliquerFiltres()">
+        <option value="">— Tous les dépôts —</option>
+        <option *ngFor="let pt of pointsDepartGrpo" [value]="pt.adresse">{{ pt.label }}</option>
+      </select>
+    </div>
+
+    <span class="toolbar__spacer"></span>
+
+    <!-- Réinitialiser filtres -->
+    <button *ngIf="filtersActifs" mat-stroked-button class="reset-btn" (click)="reinitialiserFiltres()">
+      <mat-icon>filter_alt_off</mat-icon> Réinitialiser
+    </button>
+
+    <!-- Vue switcher -->
+    <div class="view-switcher">
+      <button [class.active]="vue === 'table'" (click)="vue='table'" matTooltip="Vue tableau">
+        <mat-icon>table_rows</mat-icon>
+      </button>
+      <button [class.active]="vue === 'kanban'" (click)="vue='kanban'" matTooltip="Vue Kanban">
+        <mat-icon>view_kanban</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ VUE TABLE ════════════════════════════════════════════════ -->
+  <div class="table-container" *ngIf="vue === 'table'">
+
+    <!-- SKELETON LOADER -->
+    <table class="data-table" *ngIf="loading">
+      <thead>
+        <tr>
+          <th class="col-check"></th>
+          <th>Référence</th>
+          <th>Client</th>
+          <th>Destination</th>
+          <th>Livraison prévue</th>
+          <th>Poids / Volume</th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of skeletonRows" class="skel-row">
+          <td><span class="skel skel--xs"></span></td>
+          <td><span class="skel skel--md"></span></td>
+          <td>
+            <div class="skel-client">
+              <span class="skel skel--avatar"></span>
+              <div><span class="skel skel--sm"></span><br><span class="skel skel--xs"></span></div>
+            </div>
+          </td>
+          <td><span class="skel skel--md"></span></td>
+          <td><span class="skel skel--sm"></span></td>
+          <td><span class="skel skel--sm"></span></td>
+          <td><span class="skel skel--badge"></span></td>
+          <td><span class="skel skel--actions"></span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- EMPTY STATE -->
+    <div class="empty-state" *ngIf="!loading && commandesFiltrees.length === 0">
+      <div class="empty-state__visual">
+        <svg width="80" height="80" viewBox="0 0 24 24" fill="none">
+          <rect x="1" y="3" width="15" height="13" rx="1.5" stroke="#CBD5E1" stroke-width="1.5"/>
+          <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" stroke="#CBD5E1" stroke-width="1.5"/>
+          <circle cx="5.5" cy="18.5" r="2.5" stroke="#CBD5E1" stroke-width="1.5"/>
+          <circle cx="18.5" cy="18.5" r="2.5" stroke="#CBD5E1" stroke-width="1.5"/>
+          <line x1="8" y1="18.5" x2="16" y2="18.5" stroke="#CBD5E1" stroke-width="1.5"/>
+        </svg>
+      </div>
+      <h3>{{ filtersActifs ? 'Aucun résultat trouvé' : 'Aucune commande' }}</h3>
+      <p>{{ filtersActifs ? 'Essayez de modifier vos critères de recherche.' : 'Commencez par créer votre première commande de transport.' }}</p>
+      <div class="empty-state__actions">
+        <button *ngIf="filtersActifs" mat-stroked-button (click)="reinitialiserFiltres()">
+          <mat-icon>filter_alt_off</mat-icon> Réinitialiser les filtres
+        </button>
+        <button *ngIf="!filtersActifs" mat-flat-button class="btn-primary" (click)="nouvelleCommande()">
+          <mat-icon>add</mat-icon> Créer une commande
+        </button>
+      </div>
+    </div>
+
+    <!-- TABLE PRINCIPALE -->
+    <table class="data-table" *ngIf="!loading && commandesFiltrees.length > 0">
+      <thead>
+        <tr>
+          <th class="col-check">
+            <input type="checkbox" [(ngModel)]="selectAll" (change)="toggleAll()"
+                   class="grpo-checkbox">
+          </th>
+          <th class="col-ref">Référence</th>
+          <th class="col-client">Client</th>
+          <th class="col-dest">Destination</th>
+          <th class="col-date">Livraison prévue</th>
+          <th class="col-cargo">Marchandise</th>
+          <th class="col-statut">Statut</th>
+          <th class="col-actions">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let c of commandesFiltrees; trackBy:trackById"
+            class="data-row"
+            [class.data-row--selected]="selected.has(c.id)"
+            [class.data-row--urgent]="isUrgent(c)"
+            (click)="voirDetails(c)">
+
+          <!-- CHECKBOX -->
+          <td class="col-check" (click)="$event.stopPropagation()">
+            <input type="checkbox" class="grpo-checkbox"
+                   [checked]="selected.has(c.id)"
+                   (change)="toggleRow(c.id)">
+          </td>
+
+          <!-- RÉFÉRENCE -->
+          <td class="col-ref">
+            <div class="ref-cell">
+              <span class="ref-num">{{ c.numeroCommande }}</span>
+              <span class="ref-id">#{{ c.id }}</span>
+              <span class="tag-urgent" *ngIf="isUrgent(c)">
+                <mat-icon>bolt</mat-icon> Urgent
+              </span>
+            </div>
+          </td>
+
+          <!-- CLIENT -->
+          <td class="col-client">
+            <div class="client-cell">
+              <div class="avatar" [style.background]="avatarColor(c)">
+                {{ avatarInitiale(c) }}
+              </div>
+              <div class="client-info">
+                <span class="client-name">{{ clientNom(c) }}</span>
+                <span class="client-email" *ngIf="c.client?.email">{{ c.client?.email }}</span>
+              </div>
+            </div>
+          </td>
+
+          <!-- DESTINATION -->
+          <td class="col-dest">
+            <div class="dest-cell">
+              <div class="dest-ville">
+                <mat-icon class="dest-ico">place</mat-icon>
+                {{ c.villeLivraison }}
+              </div>
+              <div class="dest-addr">{{ truncate(c.adresseLivraison, 40) }}</div>
+            </div>
+          </td>
+
+          <!-- DATE -->
+          <td class="col-date">
+            <div class="date-cell">
+              <span class="date-main">{{ fmtDate(c.dateLivraisonPrevue) }}</span>
+              <span class="date-rel" [class.date-rel--urgent]="isUrgent(c)">
+                {{ dateRelative(c.dateLivraisonPrevue) }}
+              </span>
+            </div>
+          </td>
+
+          <!-- CARGO -->
+          <td class="col-cargo">
+            <div class="cargo-cell">
+              <span class="cargo-tag" *ngIf="c.poids">
+                <mat-icon>scale</mat-icon> {{ c.poids | number:'1.0-1' }} kg
+              </span>
+              <span class="cargo-tag" *ngIf="c.volume">
+                <mat-icon>straighten</mat-icon> {{ c.volume }} m³
+              </span>
+              <span class="no-cargo" *ngIf="!c.poids && !c.volume">—</span>
+              <span class="cargo-desc" *ngIf="c.descriptionMarchandise">
+                {{ c.descriptionMarchandise | slice:0:30 }}...
+              </span>
+            </div>
+          </td>
+
+          <!-- STATUT -->
+          <td class="col-statut">
+            <div class="statut-wrapper" (click)="$event.stopPropagation()">
+              <span class="statut-badge"
+                    [style.background]="getStatut(c.statut)?.bg"
+                    [style.color]="getStatut(c.statut)?.color"
+                    [style.border-color]="getStatut(c.statut)?.border">
+                <span class="statut-dot"
+                      [style.background]="getStatut(c.statut)?.color"
+                      [class.dot-pulse]="c.statut === 'EN_COURS'">
+                </span>
+                {{ getStatut(c.statut)?.label }}
+              </span>
+              <!-- Quick status actions -->
+              <div class="statut-quick">
+                <button *ngIf="c.statut === 'EN_ATTENTE'"
+                        class="quick-btn quick-btn--start"
+                        (click)="changerStatut(c,'EN_COURS',$event)"
+                        matTooltip="Démarrer la livraison">
+                  <mat-icon>play_arrow</mat-icon>
+                </button>
+                <button *ngIf="c.statut === 'EN_COURS'"
+                        class="quick-btn quick-btn--done"
+                        (click)="changerStatut(c,'LIVREE',$event)"
+                        matTooltip="Marquer comme livrée">
+                  <mat-icon>check</mat-icon>
+                </button>
+              </div>
+            </div>
+          </td>
+
+          <!-- ACTIONS -->
+          <td class="col-actions" (click)="$event.stopPropagation()">
+            <div class="actions-cell">
+              <!-- Boutons approbation (uniquement pour EN_ATTENTE_APPROBATION) -->
+              <ng-container *ngIf="c.statut === 'EN_ATTENTE_APPROBATION'">
+                <button mat-icon-button class="action-btn action-btn--approve"
+                        (click)="approuverCommande(c, $event)"
+                        matTooltip="Approuver la commande client">
+                  <mat-icon>check_circle</mat-icon>
+                </button>
+                <button mat-icon-button class="action-btn action-btn--reject"
+                        (click)="rejeterCommande(c, $event)"
+                        matTooltip="Rejeter la commande client">
+                  <mat-icon>cancel</mat-icon>
+                </button>
+              </ng-container>
+              <!-- Boutons standard -->
+              <button mat-icon-button class="action-btn action-btn--view"
+                      (click)="voirDetails(c)"
+                      matTooltip="Voir les détails">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              <button mat-icon-button class="action-btn action-btn--edit"
+                      (click)="modifier(c, $event)"
+                      matTooltip="Modifier"
+                      [disabled]="c.statut === 'LIVREE' || c.statut === 'ANNULEE'">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button class="action-btn action-btn--del"
+                      (click)="supprimer(c, $event)"
+                      matTooltip="Supprimer"
+                      [disabled]="c.statut === 'EN_COURS' || c.statut === 'LIVREE'">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </div>
+          </td>
+
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- PAGINATION -->
+    <div class="pagination" *ngIf="!loading && totalElements > pageSize">
+      <span class="pagination__info">
+        Affichage <strong>{{ debut }}</strong>–<strong>{{ fin }}</strong>
+        sur <strong>{{ totalElements }}</strong> commandes
+      </span>
+      <div class="pagination__ctrl">
+        <button class="pager-btn" (click)="pagePrecedente()" [disabled]="page === 0">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <button *ngFor="let p of pagesVisibles()"
+                class="pager-num"
+                [class.pager-num--active]="p === page"
+                (click)="allerPage(p)">{{ p + 1 }}</button>
+        <button class="pager-btn" (click)="pageSuivante()" [disabled]="page >= totalPages - 1">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+      <div class="pagination__size">
+        <select [(ngModel)]="pageSize" (ngModelChange)="page=0;appliquerFiltres()">
+          <option [value]="10">10 / page</option>
+          <option [value]="25">25 / page</option>
+          <option [value]="50">50 / page</option>
+        </select>
+      </div>
+    </div>
+
+  </div><!-- end table-container -->
+
+  <!-- ══ VUE KANBAN ═══════════════════════════════════════════════ -->
+  <div class="kanban-view" *ngIf="vue === 'kanban'">
+    <app-commande-kanban [commandes]="commandes"></app-commande-kanban>
+  </div>
+
+</div>

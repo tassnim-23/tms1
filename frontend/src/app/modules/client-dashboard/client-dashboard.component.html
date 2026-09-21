@@ -1,0 +1,60 @@
+<div class="dashboard-container">
+  <aside class="sidebar" [class.open]="sidebarOpen">
+    <div class="sidebar-header">
+      <h2>TMS Dashboard</h2>
+      <button class="toggle-btn" (click)="toggleSidebar()">≡</button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <ul>
+        <li>
+          <a routerLink="factures" routerLinkActive="active" class="nav-link">
+            <span class="icon">📋</span>
+            <span class="label">Factures</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="commandes" routerLinkActive="active" class="nav-link">
+            <span class="icon">📦</span>
+            <span class="label">Commandes</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="mon-profil" routerLinkActive="active" class="nav-link">
+            <span class="icon">👤</span>
+            <span class="label">Mon Profil</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="historique" routerLinkActive="active" class="nav-link">
+            <span class="icon">📊</span>
+            <span class="label">Historique</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="support" routerLinkActive="active" class="nav-link">
+            <span class="icon">💬</span>
+            <span class="label">Support</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="logout-btn" (click)="logout()">Déconnexion</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="top-bar">
+      <h1>Bienvenue, {{ currentUser?.username }}</h1>
+      <div class="user-info">
+        <span>{{ currentUser?.email }}</span>
+      </div>
+    </header>
+
+    <div class="content">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+</div>

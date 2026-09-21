@@ -1,0 +1,69 @@
+<!-- ✅ FRONTEND - ClientDashboard HTML Template -->
+<!-- Fichier: tms-frontend/tms-frontend/src/app/modules/client-dashboard/client-dashboard.component.html -->
+
+<mat-toolbar color="primary" class="dashboard-toolbar">
+  <button mat-icon-button (click)="toggleSidenav()">
+    <mat-icon>menu</mat-icon>
+  </button>
+  <span class="spacer"></span>
+  <span class="user-info">{{ currentUser?.username }}</span>
+  <button mat-icon-button matTooltip="Déconnexion" (click)="logout()">
+    <mat-icon>logout</mat-icon>
+  </button>
+</mat-toolbar>
+
+<mat-sidenav-container class="dashboard-container">
+  <!-- Sidebar -->
+  <mat-sidenav #sidenav [opened]="sidenavOpen" mode="side">
+    <div class="sidebar-header">
+      <h2>Dashboard Client</h2>
+    </div>
+    <mat-nav-list>
+      <mat-list-item routerLink="/client-dashboard/factures" 
+                     routerLinkActive="active" 
+                     (click)="sidenavOpen = false">
+        <mat-icon matListItemIcon>receipt</mat-icon>
+        <span matListItemTitle>Factures</span>
+        <span matListItemLine>Télécharger mes factures</span>
+      </mat-list-item>
+
+      <mat-list-item routerLink="/client-dashboard/profil" 
+                     routerLinkActive="active"
+                     (click)="sidenavOpen = false">
+        <mat-icon matListItemIcon>person</mat-icon>
+        <span matListItemTitle>Mon Profil</span>
+        <span matListItemLine>Modifier mes informations</span>
+      </mat-list-item>
+
+      <mat-list-item routerLink="/client-dashboard/commandes" 
+                     routerLinkActive="active"
+                     (click)="sidenavOpen = false">
+        <mat-icon matListItemIcon>add_shopping_cart</mat-icon>
+        <span matListItemTitle>Nouvelle Commande</span>
+        <span matListItemLine>Créer une commande</span>
+      </mat-list-item>
+
+      <mat-list-item routerLink="/client-dashboard/historique" 
+                     routerLinkActive="active"
+                     (click)="sidenavOpen = false">
+        <mat-icon matListItemIcon>history</mat-icon>
+        <span matListItemTitle>Historique</span>
+        <span matListItemLine>Voir l'historique</span>
+      </mat-list-item>
+
+      <mat-divider></mat-divider>
+
+      <mat-list-item (click)="logout()">
+        <mat-icon matListItemIcon>exit_to_app</mat-icon>
+        <span matListItemTitle>Déconnexion</span>
+      </mat-list-item>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <!-- Main content -->
+  <mat-sidenav-content class="dashboard-content">
+    <div class="content-wrapper">
+      <router-outlet></router-outlet>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>
